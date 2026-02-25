@@ -57,6 +57,7 @@ class HomePage extends StatelessWidget {
                     buttonText: 'ابدأ التحدي',
                     onTap: () => context.push('/monthly-contest'),
                   ),
+```dart
                   const SizedBox(height: 16),
                   _buildChallengeCard(
                     context,
@@ -65,13 +66,11 @@ class HomePage extends StatelessWidget {
                     subtitle: '100 سؤال • 45 مُجاب • المرتبة #3',
                     icon: Icons.calendar_month_outlined,
                     gradient: const [Color(0xFF3B82F6), Color(0xFF1E3A8A)],
-                    bgImageUrl: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwY2FsZW5kYXJ8ZW58MXx8fHwxNzY4NzM4Nzg5fDA&ixlib=rb-4.1.0&q=80&w=1080',
+                    bgImageUrl: 'assets/images/background.jpg',
                     buttonText: 'متابعة المسابقة',
                     onTap: () => context.push('/monthly-contest'),
                   ),
-                  const SizedBox(height: 30),
-                ],
-              ),
+                  const SizedBox(height:
             ),
           ),
         ],

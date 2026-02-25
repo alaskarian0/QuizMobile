@@ -24,7 +24,7 @@ class _QuizPageState extends State<QuizPage> {
     },
     {
       'question': 'من هو الإمام المدفون في مدينة مشهد؟',
-      'image': 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwY2FsZW5kYXJ8ZW58MXx8fHwxNzY4NzM4Nzg5fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      'image': 'assets/images/background.jpg',
       'options': ['الإمام الكاظم (ع)', 'الإمام الرضا (ع)', 'الإمام الجواد (ع)', 'الإمام الهادي (ع)'],
       'correctIndex': 1,
     }
