@@ -57,7 +57,6 @@ class HomePage extends StatelessWidget {
                     buttonText: 'ابدأ التحدي',
                     onTap: () => context.push('/monthly-contest'),
                   ),
-```dart
                   const SizedBox(height: 16),
                   _buildChallengeCard(
                     context,
@@ -70,7 +69,9 @@ class HomePage extends StatelessWidget {
                     buttonText: 'متابعة المسابقة',
                     onTap: () => context.push('/monthly-contest'),
                   ),
-                  const SizedBox(height:
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ],
