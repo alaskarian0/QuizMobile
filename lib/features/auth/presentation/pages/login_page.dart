@@ -1,14 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/providers/providers.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
+  ConsumerState<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends ConsumerState<LoginPage> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
+  bool _showLoginForm = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final success = await ref.read(authStateProvider.notifier).login(
+      _usernameController.text,
+      _passwordController.text,
+    );
+
+    if (success && mounted) {
+      context.go('/home');
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('فشل تسجيل الدخول. تحقق من بياناتك.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Watch auth state and redirect if already authenticated
+    final authState = ref.watch(authStateProvider);
+    if (authState.isAuthenticated && authState.user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.go('/home');
+      });
+    }
+
     return Scaffold(
       backgroundColor: AppColors.backgroundBeige,
       body: SafeArea(
@@ -106,6 +154,19 @@ class LoginPage extends StatelessWidget {
                 backgroundColor: const Color(0xFF1A1A1A),
                 textColor: Colors.white,
               ),
+              const SizedBox(height: 16),
+              // Toggle Login Form Button
+              TextButton(
+                onPressed: () => setState(() => _showLoginForm = !_showLoginForm),
+                child: Text(
+                  _showLoginForm ? 'إخفاء نموذج الدخول' : 'دخول باسم المستخدم',
+                  style: const TextStyle(
+                    color: Color(0xFF1B4332),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -118,6 +179,86 @@ class LoginPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
+              // Username/Password Login Form (toggleable)
+              if (_showLoginForm)
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                          labelText: 'اسم المستخدم',
+                          labelStyle: const TextStyle(color: AppColors.textLight),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        ),
+                        style: const TextStyle(color: AppColors.textDark),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'الرجاء إدخال اسم المستخدم';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'كلمة المرور',
+                          labelStyle: const TextStyle(color: AppColors.textLight),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              color: AppColors.textLight,
+                            ),
+                            onPressed: () {
+                              setState(() => _obscurePassword = !_obscurePassword);
+                            },
+                          ),
+                        ),
+                        style: const TextStyle(color: AppColors.textDark),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'الرجاء إدخال كلمة المرور';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1B4332),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'تسجيل الدخول',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               // Guest Button
               SizedBox(
                 width: double.infinity,

@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/providers/providers.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authStateProvider);
+    final userStats = ref.watch(userStatsProvider);
+    final badges = ref.watch(allBadgesProvider);
+    final dailyQuiz = ref.watch(dailyQuizProvider);
+
     return Material(
       color: AppColors.backgroundBeige,
       child: Stack(
@@ -27,49 +39,15 @@ class HomePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTopBar(),
+                  _buildTopBar(authState.user),
                   const SizedBox(height: 24),
-                  _buildGreeting(),
+                  _buildGreeting(authState.user),
                   const SizedBox(height: 16),
-                  _buildProgressCard(),
+                  _buildProgressCard(authState.user, userStats),
                   const SizedBox(height: 24),
-                  _buildBadgesSection(),
+                  _buildBadgesSection(badges),
                   const SizedBox(height: 24),
-                  _buildChallengeCard(
-                    context,
-                    tag: 'التحدي اليومي',
-                    title: 'اختبار أركان الإسلام',
-                    subtitle: 'أجب على 10 أسئلة واحصل على 50 نقطة',
-                    icon: Icons.track_changes,
-                    gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
-                    bgImageUrl: 'https://images.unsplash.com/photo-1584258708922-def95284de07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwbW9zcXVlJTIwcGF0dGVybnxlbnwxfHx8fDE3Njg3Mzg3ODl8MA&ixlib=rb-4.1.0&q=80&w=1080',
-                    onTap: () => context.push('/quiz'),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildChallengeCard(
-                    context,
-                    tag: 'اختبار موسمي',
-                    title: 'تحدي شهر رمضان المبارك',
-                    subtitle: 'اختبار خاص بأحكام الصيام والقيام',
-                    icon: Icons.star_outline,
-                    gradient: const [Color(0xFF8B5CF6), Color(0xFF4C1D95)],
-                    bgImageUrl: 'https://images.unsplash.com/photo-1612176894219-8493bf9b9b1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyYW1hZGFuJTIwbGFudGVybnxlbnwxfHx8fDE3Njg3Mzg3ODl8MA&ixlib=rb-4.1.0&q=80&w=1080',
-                    buttonText: 'ابدأ التحدي',
-                    onTap: () => context.push('/monthly-contest'),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildChallengeCard(
-                    context,
-                    tag: 'شهر محرم 1447 هـ',
-                    title: 'المسابقة الشهرية',
-                    subtitle: '100 سؤال • 45 مُجاب • المرتبة #3',
-                    icon: Icons.calendar_month_outlined,
-                    gradient: const [Color(0xFF3B82F6), Color(0xFF1E3A8A)],
-                    bgImageUrl: 'assets/images/background.jpg',
-                    buttonText: 'متابعة المسابقة',
-                    onTap: () => context.push('/monthly-contest'),
-                  ),
-                  const SizedBox(height: 24),
+                  _buildDailyChallenge(dailyQuiz),
                 ],
               ),
             ),
@@ -79,7 +57,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -90,28 +68,29 @@ class HomePage extends StatelessWidget {
             _buildCircleButton(Icons.wb_sunny_outlined, iconColor: const Color(0xFFBCA371)),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF144E2C),
-            borderRadius: BorderRadius.circular(30),
+        if (user != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF144E2C),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  user.name,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo'),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(color: Colors.white24, shape: BoxShape.circle),
+                  child: const Center(child: Text('👦', style: TextStyle(fontSize: 14))),
+                ),
+              ],
+            ),
           ),
-          child: Row(
-            children: [
-              const Text(
-                'أحمد خالد',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo'),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(color: Colors.white24, shape: BoxShape.circle),
-                child: const Center(child: Text('👦', style: TextStyle(fontSize: 14))),
-              ),
-            ],
-          ),
-        ),
         _buildCircleButton(Icons.add),
       ],
     );
@@ -125,10 +104,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildGreeting() {
-    return const Text(
-      'السلام عليكم، أحمد! 👋',
-      style: TextStyle(
+  Widget _buildGreeting(user) {
+    final name = user?.name.split(' ').first ?? 'أحمد';
+    return Text(
+      'السلام عليكم، $name! 👋',
+      style: const TextStyle(
         fontSize: 26,
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
@@ -137,7 +117,13 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressCard() {
+  Widget _buildProgressCard(user, userStats) {
+    final xp = user?.xp ?? 0;
+    final level = user?.level ?? 1;
+    final streak = user?.streak ?? 0;
+    final xpForNextLevel = level * 500;
+    final xpProgress = user?.levelProgress ?? 0.0;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -156,16 +142,16 @@ class HomePage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '3000 / 2450',
+              Text(
+                '$xp / $xpForNextLevel',
                 textDirection: TextDirection.ltr,
-                style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
               ),
               Row(
                 children: [
-                  const Text(
-                    'سلسلة: 7 أيام',
-                    style: TextStyle(
+                  Text(
+                    'سلسلة: $streak أيام',
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textDark,
@@ -181,11 +167,11 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: const LinearProgressIndicator(
-              value: 0.8,
+            child: LinearProgressIndicator(
+              value: xpProgress,
               minHeight: 12,
-              backgroundColor: Color(0xFFF1F8E9),
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+              backgroundColor: const Color(0xFFF1F8E9),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
             ),
           ),
         ],
@@ -193,36 +179,84 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgesSection() {
+  Widget _buildBadgesSection(AsyncValue<List<Badge>> badges) {
+    return badges.when(
+      data: (badgeList) {
+        // Show first 4 badges or default ones if empty
+        final displayBadges = badgeList.isEmpty ? [
+          Badge(id: '1', name: 'برق', icon: '⚡'),
+          Badge(id: '2', name: 'ملك', icon: '👑'),
+          Badge(id: '3', name: 'نجم', icon: '⭐'),
+          Badge(id: '4', name: 'فائز', icon: '🏆'),
+        ] : badgeList.take(4).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'الأوسمة',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo'),
+                ),
+                Text(
+                  '${badgeList.length} أوسمة',
+                  style: const TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'Cairo'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: displayBadges.map((badge) {
+                  return Padding(
+                    padding: const EdgeInsets.only(end: 12),
+                    child: _buildBadgeItem(
+                      badge.icon?.codeUnitAt(0) != null
+                          ? IconData(int.parse(badge.icon?.substring(1, badge.icon!.length - 1) ?? '0xE005', radix: 16))
+                          : Icons.flash_on,
+                      badge.name,
+                      const Color(0xFFF5F5F5),
+                      const Color(0xFF94A3B8),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => _buildBadgesSectionSkeleton(),
+      error: (_, __) => _buildBadgesSectionSkeleton(),
+    );
+  }
+
+  Widget _buildBadgesSectionSkeleton() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'الأوسمة',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo'),
-            ),
-            Text(
-              '12 أوسمة',
-              style: TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'Cairo'),
-            ),
-          ],
+        const Text(
+          'الأوسمة',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo'),
         ),
         const SizedBox(height: 16),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildBadgeItem(Icons.flash_on, 'برق', const Color(0xFFF5F5F5), const Color(0xFF94A3B8)),
-              const SizedBox(width: 12),
-              _buildBadgeItem(Icons.workspace_premium, 'ملك', const Color(0xFFF3E5F5), const Color(0xFF8B5CF6)),
-              const SizedBox(width: 12),
-              _buildBadgeItem(Icons.star_outline, 'نجم', const Color(0xFFE8F5E9), const Color(0xFF10B981)),
-              const SizedBox(width: 12),
-              _buildBadgeItem(Icons.emoji_events_outlined, 'فائز', const Color(0xFFE3F2FD), const Color(0xFF3B82F6)),
-            ],
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            itemBuilder: (context, index) {
+              return Container(
+                width: 80,
+                margin: const EdgeInsets.only(end: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              );
+            },
           ),
         ),
       ],
@@ -261,6 +295,49 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDailyChallenge(AsyncValue<Quiz?> dailyQuiz) {
+    return dailyQuiz.when(
+      data: (quiz) {
+        if (quiz == null) {
+          return _buildChallengeCard(
+            context,
+            tag: 'التحدي اليومي',
+            title: 'اختبار أركان الإسلام',
+            subtitle: 'أجب على 10 أسئلة واحصل على 50 نقطة',
+            icon: Icons.track_changes,
+            gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
+            bgImageUrl: 'https://images.unsplash.com/photo-1584258708922-def95284de07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwbW9zcXVlJTIwcGF0dGVybnxlbnwxfHx8fDE3Njg3Mzg3ODl8MA&ixlib=rb-4.1.0&q=80&w=1080',
+            onTap: () => context.push('/quiz'),
+          );
+        }
+
+        return _buildChallengeCard(
+          context,
+          tag: 'التحدي اليومي',
+          title: quiz.title,
+          subtitle: quiz.description ?? 'أجب على ${quiz.questions.length} أسئلة واحصل على ${quiz.xp} نقطة',
+          icon: Icons.track_changes,
+          gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
+          bgImageUrl: 'https://images.unsplash.com/photo-1584258708922-def95284de07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwbW9zcXVlJTIwcGF0dGVybnxlbnwxfHx8fDE3Njg3Mzg3ODl8MA&ixlib=rb-4.1.0&q=80&w=1080',
+          onTap: () => context.push('/quiz/${quiz.id}'),
+        );
+      },
+      loading: () => _buildChallengeCardSkeleton(),
+      error: (_, __) => _buildChallengeCardSkeleton(),
+    );
+  }
+
+  Widget _buildChallengeCardSkeleton() {
+    return Container(
+      height: 200,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
