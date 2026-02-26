@@ -23,55 +23,42 @@ class ContentListPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: Stack(
-        children: [
-          // Background Pattern
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.02,
-              child: AppNetworkImage(
-                url: 'https://www.transparenttextures.com/patterns/islamic-art.png',
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              backgroundColor: colorScheme.surface,
+              elevation: 0,
+              pinned: true,
+              centerTitle: true,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios_rounded, color: colorScheme.onSurface),
+                onPressed: () => context.pop(),
+              ),
+              title: Text(
+                title,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontFamily: 'Cairo',
+                ),
               ),
             ),
-          ),
-          SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  backgroundColor: colorScheme.surface,
-                  elevation: 0,
-                  pinned: true,
-                  centerTitle: true,
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_rounded, color: colorScheme.onSurface),
-                    onPressed: () => context.pop(),
-                  ),
-                  title: Text(
-                    title,
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      fontFamily: 'Cairo',
-                    ),
-                  ),
+            SliverPadding(
+              padding: const EdgeInsets.all(20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final item = items[index];
+                    return _buildContentItem(context, item, isDark, colorScheme);
+                  },
+                  childCount: items.length,
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.all(20),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final item = items[index];
-                        return _buildContentItem(context, item, isDark, colorScheme);
-                      },
-                      childCount: items.length,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

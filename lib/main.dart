@@ -5,6 +5,15 @@ import 'core/routing/app_router.dart';
 import 'core/theme/theme_provider.dart';
 
 void main() {
+  // Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Set error handler for Flutter errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter Error: ${details.exception}');
+  };
+
   runApp(
     const ProviderScope(
       child: MyApp(),

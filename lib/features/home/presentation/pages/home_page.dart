@@ -39,35 +39,27 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Material(
       color: colorScheme.surface,
-      child: Stack(
-        children: [
-          // Background Pattern
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.02,
-              child: AppNetworkImage(
-                url: 'https://www.transparenttextures.com/patterns/islamic-art.png',
-              ),
-            ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopBar(authState.user),
+              const SizedBox(height: 24),
+              _buildGreeting(authState.user),
+              const SizedBox(height: 16),
+              _buildProgressCard(authState.user, userStats),
+              const SizedBox(height: 24),
+              _buildDailyChallenge(dailyQuiz, categoriesState),
+              const SizedBox(height: 32),
+              _buildBadgesSection(badges),
+              const SizedBox(height: 24),
+              _buildCategoriesSection(categoriesState),
+              const SizedBox(height: 120), // Space for bottom nav - increased to fix overflow
+            ],
           ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopBar(authState.user),
-                  const SizedBox(height: 24),
-                  _buildGreeting(authState.user),
-                  const SizedBox(height: 16),
-                  _buildProgressCard(authState.user, userStats),
-                  _buildDailyChallenge(dailyQuiz, categoriesState),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -405,7 +397,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             : categoriesState.error != null
                 ? _buildCategoriesError(categoriesState.error!)
                 : _buildCategoriesList(
-                    categoriesState.categories.where((c) => c.showOnHome).toList(),
+                    categoriesState.categories.toList(),
                   ),
       ],
     );
@@ -641,11 +633,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           colors: gradient,
         ),
         borderRadius: BorderRadius.circular(28),
-        image: bgImageUrl != null ? DecorationImage(
-          image: NetworkImage(bgImageUrl),
-          fit: BoxFit.cover,
-          opacity: 0.12,
-        ) : null,
+        // Removed background image to prevent 404 errors
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),

@@ -17,74 +17,62 @@ class ResultsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundBeige,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.03,
-              child: AppNetworkImage(
-                url: 'https://www.transparenttextures.com/patterns/islamic-art.png',
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'تهانينا! 🎉',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B4332),
+                  fontFamily: 'Cairo',
+                ),
               ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'تهانينا! 🎉',
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1B4332),
-                      fontFamily: 'Cairo',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'لقد أتممت التحدي بنجاح استمر في التعلم!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18, color: AppColors.textLight, fontFamily: 'Cairo'),
-                  ),
-                  const SizedBox(height: 48),
-                  _buildScoreCircle(),
-                  const SizedBox(height: 48),
-                  _buildStatsRow(),
-                  const SizedBox(height: 48),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: ElevatedButton(
-                      onPressed: () => context.go('/'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1B4332),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 0,
-                      ),
-                      child: const Text('العودة للرئيسية', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: OutlinedButton(
-                      onPressed: () => context.pushReplacement('/quiz'),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF1B4332), width: 2),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: const Text('إعادة المحاولة', style: TextStyle(color: Color(0xFF1B4332), fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 8),
+              const Text(
+                'لقد أتممت التحدي بنجاح استمر في التعلم!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, color: AppColors.textLight, fontFamily: 'Cairo'),
               ),
-            ),
+              const SizedBox(height: 48),
+              _buildScoreCircle(),
+              const SizedBox(height: 48),
+              _buildStatsRow(),
+              const SizedBox(height: 48),
+              SizedBox(
+                width: double.infinity,
+                height: 58,
+                child: ElevatedButton(
+                  onPressed: () => context.go('/'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1B4332),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text('العودة للرئيسية', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 58,
+                child: OutlinedButton(
+                  onPressed: () => context.pushReplacement('/quiz'),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF1B4332), width: 2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('إعادة المحاولة', style: TextStyle(color: Color(0xFF1B4332), fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

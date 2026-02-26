@@ -61,39 +61,27 @@ class _QuizPageState extends State<QuizPage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Opacity(
-              opacity: theme.brightness == Brightness.dark ? 0.01 : 0.03,
-              child: AppNetworkImage(
-                url: 'https://www.transparenttextures.com/patterns/islamic-art.png',
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildQuizCard(question),
+                    const SizedBox(height: 16),
+                    _buildActionButtons(),
+                    const SizedBox(height: 24),
+                    _buildFinishButton(),
+                    const SizedBox(height: 30),
+                  ],
+                ),
               ),
             ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        _buildQuizCard(question),
-                        const SizedBox(height: 16),
-                        _buildActionButtons(),
-                        const SizedBox(height: 24),
-                        _buildFinishButton(),
-                        const SizedBox(height: 30),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

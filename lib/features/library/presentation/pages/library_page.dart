@@ -31,45 +31,32 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: Stack(
-        children: [
-          // Background Pattern
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.02,
-              child: AppNetworkImage(
-                url: 'https://www.transparenttextures.com/patterns/islamic-art.png',
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            _buildSliverAppBar(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildWelcomeCard(),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader('أقسام المكتبة'),
+                    const SizedBox(height: 16),
+                    _buildLibrarySections(),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader('جميع الدورات التعليمية'),
+                    const SizedBox(height: 16),
+                    _buildCategoriesGrid(categoriesState),
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
             ),
-          ),
-          SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                _buildSliverAppBar(),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildWelcomeCard(),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader('أقسام المكتبة'),
-                        const SizedBox(height: 16),
-                        _buildLibrarySections(),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader('جميع الدورات التعليمية'),
-                        const SizedBox(height: 16),
-                        _buildCategoriesGrid(categoriesState),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

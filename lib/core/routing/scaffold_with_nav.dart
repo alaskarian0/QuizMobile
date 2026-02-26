@@ -17,7 +17,6 @@ class ScaffoldWithNav extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
-        height: 85,
         decoration: BoxDecoration(
           color: colorScheme.surface,
           boxShadow: [
@@ -29,38 +28,41 @@ class ScaffoldWithNav extends StatelessWidget {
           ],
         ),
         child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                context,
-                index: 0,
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home_rounded,
-                label: 'الرئيسية',
-              ),
-              _buildNavItem(
-                context,
-                index: 1,
-                icon: Icons.map_outlined,
-                activeIcon: Icons.map_rounded,
-                label: 'المسار',
-              ),
-              _buildNavItem(
-                context,
-                index: 2,
-                icon: Icons.book_outlined,
-                activeIcon: Icons.book_rounded,
-                label: 'المكتبة',
-              ),
-              _buildNavItem(
-                context,
-                index: 3,
-                icon: Icons.person_outline_rounded,
-                activeIcon: Icons.person_rounded,
-                label: 'الملف',
-              ),
-            ],
+          child: SizedBox(
+            height: 65,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  context,
+                  index: 0,
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: 'الرئيسية',
+                ),
+                _buildNavItem(
+                  context,
+                  index: 1,
+                  icon: Icons.map_outlined,
+                  activeIcon: Icons.map_rounded,
+                  label: 'المسار',
+                ),
+                _buildNavItem(
+                  context,
+                  index: 2,
+                  icon: Icons.book_outlined,
+                  activeIcon: Icons.book_rounded,
+                  label: 'المكتبة',
+                ),
+                _buildNavItem(
+                  context,
+                  index: 3,
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: 'الملف',
+                ),
+              ],
+            ),
           ),
         ),
       ),

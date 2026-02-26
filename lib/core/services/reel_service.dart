@@ -23,8 +23,9 @@ class ReelService {
 
       return [];
     } catch (e) {
-      debugPrint('Error fetching reels: $e');
-      rethrow;
+      // Return empty list on error
+      debugPrint('Reels endpoint not available, returning empty list');
+      return [];
     }
   }
 
@@ -41,8 +42,9 @@ class ReelService {
 
       return [];
     } catch (e) {
-      debugPrint('Error fetching active reels: $e');
-      rethrow;
+      // Return empty list on error instead of rethrowing
+      debugPrint('Reels endpoint not available, returning empty list');
+      return [];
     }
   }
 
@@ -59,8 +61,8 @@ class ReelService {
 
       return [];
     } catch (e) {
-      debugPrint('Error fetching user reels: $e');
-      rethrow;
+      // Return empty list on error
+      return [];
     }
   }
 
@@ -77,8 +79,8 @@ class ReelService {
 
       return [];
     } catch (e) {
-      debugPrint('Error fetching my reels: $e');
-      rethrow;
+      // Return empty list on error
+      return [];
     }
   }
 
