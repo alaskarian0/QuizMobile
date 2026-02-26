@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/quiz.dart';
+import '../models/question.dart';
 import '../services/quiz_service.dart';
 
 /// Quiz Service provider

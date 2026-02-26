@@ -63,11 +63,20 @@ class ApiClient {
     );
 
     // Try to refresh token on 401
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
       if (refreshed) {
         return get(endpoint, headers: headers);
       }
+      // If refresh failed, try once more without token (for public endpoints)
+      final publicHeaders = {
+        'Content-Type': 'application/json',
+        ...?headers,
+      };
+      return _client.get(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: publicHeaders,
+      );
     }
 
     return response;
@@ -93,11 +102,21 @@ class ApiClient {
     );
 
     // Try to refresh token on 401
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
       if (refreshed) {
         return post(endpoint, headers: headers, body: body);
       }
+      // If refresh failed, try once more without token (for public endpoints)
+      final publicHeaders = {
+        'Content-Type': 'application/json',
+        ...?headers,
+      };
+      return _client.post(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: publicHeaders,
+        body: body != null ? jsonEncode(body) : null,
+      );
     }
 
     return response;
@@ -123,11 +142,21 @@ class ApiClient {
     );
 
     // Try to refresh token on 401
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
       if (refreshed) {
         return patch(endpoint, headers: headers, body: body);
       }
+      // If refresh failed, try once more without token (for public endpoints)
+      final publicHeaders = {
+        'Content-Type': 'application/json',
+        ...?headers,
+      };
+      return _client.patch(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: publicHeaders,
+        body: body != null ? jsonEncode(body) : null,
+      );
     }
 
     return response;
@@ -151,11 +180,20 @@ class ApiClient {
     );
 
     // Try to refresh token on 401
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
       if (refreshed) {
         return delete(endpoint, headers: headers);
       }
+      // If refresh failed, try once more without token (for public endpoints)
+      final publicHeaders = {
+        'Content-Type': 'application/json',
+        ...?headers,
+      };
+      return _client.delete(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: publicHeaders,
+      );
     }
 
     return response;
@@ -165,7 +203,11 @@ class ApiClient {
   Future<bool> _refreshToken() async {
     try {
       final refreshToken = await getRefreshToken();
-      if (refreshToken == null) return false;
+      if (refreshToken == null) {
+        // No refresh token, clear expired access token
+        await clearTokens();
+        return false;
+      }
 
       final response = await _client.post(
         Uri.parse('$baseUrl/auth/refresh'),
@@ -186,13 +228,16 @@ class ApiClient {
           return true;
         }
       }
+
+      // If we get here, refresh failed
+      await clearTokens();
+      return false;
     } catch (e) {
       debugPrint('Error refreshing token: $e');
+      // Clear tokens on any error
+      await clearTokens();
+      return false;
     }
-
-    // Clear tokens if refresh fails
-    await clearTokens();
-    return false;
   }
 
   /// Handle API response

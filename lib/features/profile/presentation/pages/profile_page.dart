@@ -1,34 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundBeige,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'الملف الشخصي',
           style: TextStyle(
-            color: AppColors.textDark,
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 22,
           ),
         ),
         automaticallyImplyLeading: false,
         actions: [
+          // Theme toggle button on RIGHT
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: AppColors.textDark),
-            onPressed: () {},
+            icon: Icon(
+              ref.watch(themeProvider) ? Icons.dark_mode_outlined : Icons.wb_sunny_outlined,
+              color: ref.watch(themeProvider) ? const Color(0xFF1B5E20) : Colors.orange,
+            ),
+            onPressed: () {
+              ref.read(themeProvider.notifier).toggleTheme();
+            },
           ),
+          // Settings button
           IconButton(
-            icon: const Icon(Icons.wb_sunny_outlined, color: Colors.orange),
-            onPressed: () {},
+            icon: Icon(Icons.settings_outlined, color: colorScheme.onSurface),
+            onPressed: () {
+              context.push('/profile/settings');
+            },
           ),
         ],
       ),
@@ -40,6 +55,8 @@ class ProfilePage extends StatelessWidget {
             _buildProfileCard(),
             const SizedBox(height: 24),
             _buildStatsGrid(),
+            const SizedBox(height: 24),
+            _buildActionButtons(context),
             const SizedBox(height: 32),
             _buildBadgesSection(),
             const SizedBox(height: 40),
@@ -217,6 +234,96 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Column(
+      children: [
+        _buildActionButton(
+          'القصص والمحتوى',
+          'استعرض القصص والمحتوى التعليمي',
+          Icons.play_circle_filled,
+          AppColors.forestGreen,
+          () => context.push('/profile/reels'),
+        ),
+        const SizedBox(height: 12),
+        _buildActionButton(
+          'سجل الإجابات',
+          'راجع إحصائيات وإجاباتك السابقة',
+          Icons.history_edu,
+          AppColors.goldenYellow,
+          () => context.push('/profile/answer-history'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_back_ios,
+              color: Colors.grey[400],
+              size: 18,
+            ),
+          ],
+        ),
       ),
     );
   }

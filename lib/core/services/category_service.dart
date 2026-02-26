@@ -11,8 +11,15 @@ class CategoryService {
   /// Get all categories
   Future<List<Category>> getCategories() async {
     try {
-      final response = await _apiClient.get('/questions/categories');
+      final response = await _apiClient.get('/categories');
       final data = _apiClient.handleResponse(response);
+
+      // Handle both direct array and wrapped response
+      if (data is Map && data.containsKey('data')) {
+        final List<dynamic> categoriesJson = data['data'];
+        return categoriesJson.map((e) => Category.fromJson(e as Map<String, dynamic>)).toList();
+      }
+
       return (data as List)
           .map((e) => Category.fromJson(e as Map<String, dynamic>))
           .toList();

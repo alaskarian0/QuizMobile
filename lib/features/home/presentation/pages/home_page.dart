@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/providers/providers.dart';
+import '../../../../core/models/quiz.dart';
+import '../../../../core/models/user.dart' as user_models;
+import '../../../../core/models/category.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -13,15 +17,28 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  // Gradient colors for different categories
+  final List<List<Color>> _categoryGradients = [
+    [const Color(0xFF10B981), const Color(0xFF144E2C)], // Green
+    [const Color(0xFF8B5CF6), const Color(0xFF6366F1)], // Purple
+    [const Color(0xFFF59E0B), const Color(0xFFD97706)], // Orange
+    [const Color(0xFF2196F3), const Color(0xFF1E40AF)], // Blue
+    [const Color(0xFFEC4899), const Color(0xFFBE185D)], // Pink
+    [const Color(0xFF14B8A6), const Color(0xFF0F766E)], // Teal
+  ];
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
     final userStats = ref.watch(userStatsProvider);
     final badges = ref.watch(allBadgesProvider);
     final dailyQuiz = ref.watch(dailyQuizProvider);
+    final categoriesState = ref.watch(categoriesStateProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Material(
-      color: AppColors.backgroundBeige,
+      color: colorScheme.surface,
       child: Stack(
         children: [
           // Background Pattern
@@ -47,7 +64,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                   const SizedBox(height: 24),
                   _buildBadgesSection(badges),
                   const SizedBox(height: 24),
+                  _buildCategoriesSection(categoriesState),
+                  const SizedBox(height: 24),
                   _buildDailyChallenge(dailyQuiz),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -58,6 +78,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildTopBar(user) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = ref.watch(themeProvider);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -65,7 +89,13 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             _buildCircleButton(Icons.grid_view_rounded),
             const SizedBox(width: 10),
-            _buildCircleButton(Icons.wb_sunny_outlined, iconColor: const Color(0xFFBCA371)),
+            _buildCircleButton(
+              isDarkMode ? Icons.dark_mode_outlined : Icons.wb_sunny_outlined,
+              iconColor: isDarkMode ? const Color(0xFF4CAF50) : const Color(0xFFBCA371),
+              onTap: () {
+                ref.read(themeProvider.notifier).toggleTheme();
+              },
+            ),
           ],
         ),
         if (user != null)
@@ -96,28 +126,50 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildCircleButton(IconData icon, {Color? iconColor}) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-      child: Icon(icon, color: iconColor ?? AppColors.textDark, size: 20),
+  Widget _buildCircleButton(IconData icon, {Color? iconColor, VoidCallback? onTap}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: theme.brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: iconColor ?? colorScheme.onSurface, size: 20),
+      ),
     );
   }
 
   Widget _buildGreeting(user) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final name = user?.name.split(' ').first ?? 'أحمد';
     return Text(
       'السلام عليكم، $name! 👋',
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 26,
         fontWeight: FontWeight.bold,
-        color: AppColors.textDark,
+        color: colorScheme.onSurface,
         fontFamily: 'Cairo',
       ),
     );
   }
 
   Widget _buildProgressCard(user, userStats) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final xp = user?.xp ?? 0;
     final level = user?.level ?? 1;
     final streak = user?.streak ?? 0;
@@ -127,7 +179,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -151,10 +203,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                 children: [
                   Text(
                     'سلسلة: $streak أيام',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
+                      color: colorScheme.onSurface,
                       fontFamily: 'Cairo',
                     ),
                   ),
@@ -179,15 +231,16 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildBadgesSection(AsyncValue<List<Badge>> badges) {
+  Widget _buildBadgesSection(AsyncValue<List<user_models.Badge>> badges) {
+    final theme = Theme.of(context);
+
     return badges.when(
       data: (badgeList) {
-        // Show first 4 badges or default ones if empty
         final displayBadges = badgeList.isEmpty ? [
-          Badge(id: '1', name: 'برق', icon: '⚡'),
-          Badge(id: '2', name: 'ملك', icon: '👑'),
-          Badge(id: '3', name: 'نجم', icon: '⭐'),
-          Badge(id: '4', name: 'فائز', icon: '🏆'),
+          user_models.Badge(id: '1', name: 'برق', icon: '⚡'),
+          user_models.Badge(id: '2', name: 'ملك', icon: '👑'),
+          user_models.Badge(id: '3', name: 'نجم', icon: '⭐'),
+          user_models.Badge(id: '4', name: 'فائز', icon: '🏆'),
         ] : badgeList.take(4).toList();
 
         return Column(
@@ -196,13 +249,13 @@ class _HomePageState extends ConsumerState<HomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'الأوسمة',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo'),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface, fontFamily: 'Cairo'),
                 ),
                 Text(
                   '${badgeList.length} أوسمة',
-                  style: const TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'Cairo'),
+                  style: TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'Cairo'),
                 ),
               ],
             ),
@@ -212,14 +265,15 @@ class _HomePageState extends ConsumerState<HomePage> {
               child: Row(
                 children: displayBadges.map((badge) {
                   return Padding(
-                    padding: const EdgeInsets.only(end: 12),
+                    padding: const EdgeInsets.only(right: 12),
                     child: _buildBadgeItem(
-                      badge.icon?.codeUnitAt(0) != null
-                          ? IconData(int.parse(badge.icon?.substring(1, badge.icon!.length - 1) ?? '0xE005', radix: 16))
+                      badge.icon != null && badge.icon!.isNotEmpty
+                          ? Icons.emoji_emotions
                           : Icons.flash_on,
                       badge.name,
                       const Color(0xFFF5F5F5),
                       const Color(0xFF94A3B8),
+                      badge.icon ?? '',
                     ),
                   );
                 }).toList(),
@@ -234,12 +288,14 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildBadgesSectionSkeleton() {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'الأوسمة',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo'),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface, fontFamily: 'Cairo'),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -250,9 +306,9 @@ class _HomePageState extends ConsumerState<HomePage> {
             itemBuilder: (context, index) {
               return Container(
                 width: 80,
-                margin: const EdgeInsets.only(end: 12),
+                margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
                   borderRadius: BorderRadius.circular(24),
                 ),
               );
@@ -263,7 +319,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildBadgeItem(IconData icon, String label, Color bgColor, Color iconColor) {
+  Widget _buildBadgeItem(IconData icon, String label, Color bgColor, Color iconColor, [String? iconEmoji]) {
     return Container(
       width: 80,
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -286,7 +342,12 @@ class _HomePageState extends ConsumerState<HomePage> {
               color: bgColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: iconEmoji != null && iconEmoji.isNotEmpty
+                ? Text(
+                    iconEmoji,
+                    style: const TextStyle(fontSize: 24),
+                  )
+                : Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(height: 8),
           Text(
@@ -296,6 +357,260 @@ class _HomePageState extends ConsumerState<HomePage> {
         ],
       ),
     );
+  }
+
+  Widget _buildCategoriesSection(CategoriesState categoriesState) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'الدورات التعليمية',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface, fontFamily: 'Cairo'),
+        ),
+        const SizedBox(height: 16),
+        categoriesState.isLoading
+            ? _buildCategoriesSkeleton()
+            : categoriesState.error != null
+                ? _buildCategoriesError(categoriesState.error!)
+                : categoriesState.categories.isEmpty
+                    ? _buildEmptyCategories()
+                    : _buildCategoriesList(categoriesState.categories),
+      ],
+    );
+  }
+
+  Widget _buildCategoriesList(List<Category> categories) {
+    // Show all categories as large cards like the daily challenge
+    return Column(
+      children: categories.asMap().entries.map((entry) {
+        final index = entry.key;
+        final category = entry.value;
+        final gradient = _categoryGradients[index % _categoryGradients.length];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: _buildCategoryChallengeCard(
+            context,
+            category: category,
+            tag: 'الدورة',
+            title: category.name,
+            subtitle: '${category.questionCount} سؤال • اختبر معلوماتك',
+            icon: category.icon != null && category.icon!.isNotEmpty
+                ? Icons.emoji_events
+                : Icons.menu_book,
+            gradient: gradient,
+            iconEmoji: category.icon,
+            onTap: () => context.push('/categories/${category.id}'),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCategoryChallengeCard(
+    BuildContext context, {
+    required Category category,
+    required String tag,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required List<Color> gradient,
+    String? iconEmoji,
+    required VoidCallback onTap,
+  }) {
+    final color = _parseColor(category.color ?? '#10B981');
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: gradient,
+          ),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: gradient[0].withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              // Icon/Emoji on the left
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Center(
+                  child: iconEmoji != null && iconEmoji.isNotEmpty
+                      ? Text(
+                          iconEmoji,
+                          style: const TextStyle(fontSize: 40),
+                        )
+                      : Icon(icon, color: Colors.white, size: 40),
+                ),
+              ),
+              const SizedBox(width: 20),
+              // Content in the middle
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        tag,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Play button on the right
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.play_arrow,
+                  color: gradient[1],
+                  size: 28,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoriesSkeleton() {
+    return Column(
+      children: List.generate(3, (index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          height: 110,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      }),
+    );
+  }
+
+  Widget _buildCategoriesError(String error) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              error,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.read(categoriesStateProvider.notifier).refresh(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyCategories() {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.category_outlined,
+            size: 48,
+            color: AppColors.textLight,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'لا توجد دورات حالياً',
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.textLight,
+              fontFamily: 'Cairo',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _parseColor(String hexColor) {
+    try {
+      return Color(int.parse(hexColor.replaceAll('#', '0xFF')));
+    } catch (e) {
+      return const Color(0xFF10B981);
+    }
   }
 
   Widget _buildDailyChallenge(AsyncValue<Quiz?> dailyQuiz) {

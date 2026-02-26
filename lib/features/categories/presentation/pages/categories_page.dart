@@ -1,111 +1,120 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/providers/providers.dart';
 
-class CategoriesPage extends StatelessWidget {
+class CategoriesPage extends ConsumerWidget {
   const CategoriesPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categoriesState = ref.watch(categoriesStateProvider);
+
     return Scaffold(
       backgroundColor: AppColors.backgroundBeige,
       appBar: AppBar(
         title: const Text('المسار التعليمي'), // Educational Path
         elevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        children: [
-          _buildPathNode(
-            title: 'أركان الإسلام', // Pillars of Islam
-            stars: 3,
-            isActive: true,
-            isCompleted: true,
-            alignment: 0,
-          ),
-          _buildPathConnector(alignment: 0.3),
-          _buildPathNode(
-            title: 'التوحيد', // Monotheism
-            stars: 2,
-            isActive: true,
-            isCompleted: false,
-            alignment: 0.6,
-          ),
-          _buildPathConnector(alignment: 0.3),
-          _buildPathNode(
-            title: 'الصلاة', // Prayer
-            stars: 0,
-            isActive: false,
-            isCompleted: false,
-            alignment: -0.2,
-          ),
-          _buildPathConnector(alignment: -0.5),
-          _buildPathNode(
-            title: 'السيرة النبوية', // Prophetic Biography
-            stars: 0,
-            isActive: false,
-            isCompleted: false,
-            alignment: -0.6,
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(categoriesStateProvider.notifier).refresh(),
+        child: categoriesState.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : categoriesState.error != null
+                ? _buildErrorWidget(categoriesState.error!, () {
+                    ref.read(categoriesStateProvider.notifier).refresh();
+                  })
+                : categoriesState.categories.isEmpty
+                    ? _buildEmptyWidget()
+                    : _buildCategoriesList(context, categoriesState.categories),
       ),
     );
   }
 
-  Widget _buildPathNode({
-    required String title,
-    required int stars,
-    required bool isActive,
-    required bool isCompleted,
-    required double alignment, // -1 to 1
+  Widget _buildCategoriesList(BuildContext context, List categories) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        final alignment = (index % 3 - 1) * 0.6; // Alternating positions
+        return Column(
+          children: [
+            if (index > 0) _buildPathConnector(alignment: (index % 2 == 0) ? 0.3 : -0.3),
+            _buildCategoryCard(
+              context,
+              category: category,
+              alignment: alignment,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoryCard(
+    BuildContext context, {
+    required dynamic category,
+    required double alignment,
   }) {
+    final String name = category.name ?? '';
+    final String? icon = category.icon;
+    final int questionCount = category.questionCount ?? 0;
+    final String color = category.color ?? '#10B981';
+
     return Align(
       alignment: Alignment(alignment, 0),
       child: Column(
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(3, (index) {
-              return Icon(
-                Icons.star,
-                size: 16,
-                color: index < stars ? AppColors.goldenYellow : Colors.grey[300],
-              );
-            }),
-          ),
-          const SizedBox(height: 8),
           GestureDetector(
-            onTap: isActive ? () {} : null,
+            onTap: () => context.push('/categories/${category.id}'),
             child: Container(
-              width: 90,
-              height: 90,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
-                color: isActive ? AppColors.forestGreen : Colors.grey[300],
+                color: _parseColor(color),
                 shape: BoxShape.circle,
                 boxShadow: [
-                  if (isActive)
-                    BoxShadow(
-                      color: AppColors.forestGreen.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
+                  BoxShadow(
+                    color: _parseColor(color).withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
                 ],
               ),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                   Icon(
-                    isActive ? Icons.menu_book : Icons.lock,
-                    color: Colors.white,
-                    size: 40,
-                  ),
-                  if (isCompleted)
-                    const Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: CircleAvatar(
-                        radius: 12,
-                        backgroundColor: AppColors.goldenYellow,
-                        child: Icon(Icons.check, size: 16, color: Colors.white),
+                  if (icon != null && icon.isNotEmpty)
+                    Text(
+                      icon,
+                      style: const TextStyle(fontSize: 40),
+                    )
+                  else
+                    const Icon(
+                      Icons.menu_book,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  if (questionCount > 0)
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '$questionCount',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.forestGreen,
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -113,11 +122,17 @@ class CategoriesPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isActive ? AppColors.textDark : AppColors.textLight,
+          SizedBox(
+            width: 120,
+            child: Text(
+              name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -127,13 +142,74 @@ class CategoriesPage extends StatelessWidget {
 
   Widget _buildPathConnector({required double alignment}) {
     return Container(
-      height: 60,
+      height: 40,
       width: double.infinity,
       alignment: Alignment(alignment, 0),
       child: Container(
-        width: 4,
-        color: Colors.grey[300],
+        width: 3,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
+  }
+
+  Widget _buildErrorWidget(String error, VoidCallback onRetry) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            error,
+            style: const TextStyle(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: onRetry,
+            child: const Text('إعادة المحاولة'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyWidget() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.category_outlined,
+            size: 64,
+            color: AppColors.textLight,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'لا توجد فئات حالياً',
+            style: TextStyle(
+              fontSize: 18,
+              color: AppColors.textLight,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _parseColor(String hexColor) {
+    try {
+      return Color(int.parse(hexColor.replaceAll('#', '0xFF')));
+    } catch (e) {
+      return AppColors.forestGreen;
+    }
   }
 }

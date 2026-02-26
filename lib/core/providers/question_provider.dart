@@ -67,28 +67,20 @@ class QuestionsNotifier extends StateNotifier<QuestionsState> {
   }
 }
 
-/// Questions State Provider (with optional filters)
-final questionsStateProvider = StateNotifierProvider.family<QuestionsNotifier, QuestionsState, ({
-  String? categoryId,
-  QuestionDifficulty? difficulty,
-})?>((ref, filters) {
+/// Questions State Provider
+final questionsStateProvider = StateNotifierProvider<QuestionsNotifier, QuestionsState>((ref) {
   final questionService = ref.watch(questionServiceProvider);
   final notifier = QuestionsNotifier(questionService);
 
-  // Load questions when filters change
-  if (filters != null) {
-    notifier.loadQuestions(
-      categoryId: filters.categoryId,
-      difficulty: filters.difficulty,
-    );
-  }
+  // Load all questions initially
+  notifier.loadQuestions();
 
-  return notifier.state;
+  return notifier;
 });
 
 /// Questions list provider
 final questionsProvider = Provider<List<Question>>((ref) {
-  return ref.watch(questionsStateProvider(null)).questions;
+  return ref.watch(questionsStateProvider).questions;
 });
 
 /// Daily question provider

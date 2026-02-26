@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/app_colors.dart';
 
 class ScaffoldWithNav extends StatelessWidget {
   const ScaffoldWithNav({
@@ -12,12 +11,17 @@ class ScaffoldWithNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
         height: 85,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF2C2C2C)
+              : Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -42,14 +46,14 @@ class ScaffoldWithNav extends StatelessWidget {
                 index: 1,
                 icon: Icons.menu_book_outlined,
                 activeIcon: Icons.menu_book_rounded,
-                label: 'المسار',
+                label: 'المكتبة',
               ),
               _buildNavItem(
                 context,
                 index: 2,
                 icon: Icons.emoji_events_outlined,
                 activeIcon: Icons.emoji_events_rounded,
-                label: 'المسابقة',
+                label: 'الإنجازات',
               ),
               _buildNavItem(
                 context,
@@ -73,7 +77,14 @@ class ScaffoldWithNav extends StatelessWidget {
     required String label,
   }) {
     final isSelected = navigationShell.currentIndex == index;
-    final color = isSelected ? Colors.white : Colors.grey[400];
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final color = isSelected
+        ? Colors.white
+        : (theme.brightness == Brightness.dark
+            ? Colors.grey[400]
+            : Colors.grey[400]);
 
     return GestureDetector(
       onTap: () => _onTap(context, index),
@@ -83,7 +94,7 @@ class ScaffoldWithNav extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.forestGreen : Colors.transparent,
+          color: isSelected ? colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
