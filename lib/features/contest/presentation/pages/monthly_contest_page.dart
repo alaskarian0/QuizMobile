@@ -121,15 +121,18 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
   }
 
   Widget _buildIntro() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundBeige,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'المسابقة الشهرية',
-          style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+          style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
         ),
         automaticallyImplyLeading: false,
       ),
@@ -142,10 +145,10 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: AppColors.blueGradient,
+                  colors: [const Color(0xFF10B981), const Color(0xFF0F4C36)],
                 ),
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
@@ -161,7 +164,7 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
                   const Icon(Icons.emoji_events_outlined, color: Colors.white, size: 80),
                   const SizedBox(height: 16),
                   const Text(
-                    'مسابقة شهر رجب',
+                    'مسابقة شهر رمضان',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Cairo'),
                     textAlign: TextAlign.center,
                   ),
@@ -184,9 +187,9 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
             _buildIntroInfoItem(Icons.star_outline, 'المواضيع', 'الأئمة، أصول الدين، كربلاء، المراقد', const Color(0xFFE8F5E9), AppColors.emeraldGreen),
             
             const SizedBox(height: 32),
-            const Text(
+            Text(
               'تعليمات المسابقة',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo'),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontFamily: 'Cairo'),
             ),
             const SizedBox(height: 16),
             _buildInstructionItem('اقرأ كل سؤال بتمعن قبل الإجابة'),
@@ -239,8 +242,8 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo')),
-               Text(value, style: const TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'Cairo')),
+               Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, fontFamily: 'Cairo')),
+               Text(value, style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant, fontFamily: 'Cairo')),
             ],
           ),
         ),
@@ -255,45 +258,49 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
         children: [
           const Icon(Icons.check_circle_outline, color: AppColors.sapphireBlue, size: 22),
           const SizedBox(width: 12),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 15, color: AppColors.textDark, fontFamily: 'Cairo'))),
+          Expanded(child: Text(text, style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurface, fontFamily: 'Cairo'))),
         ],
       ),
     );
   }
 
   Widget _buildFooterStat(IconData icon, String label, String value) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceWhite,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
           Icon(icon, color: AppColors.sapphireBlue, size: 28),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textLight, fontFamily: 'Cairo')),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo')),
+          Text(label, style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontFamily: 'Cairo')),
+          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontFamily: 'Cairo')),
         ],
       ),
     );
   }
 
   Widget _buildActiveContest() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final question = _questions[_currentQuestionIndex];
     final bool isAnswered = _answeredIndices.contains(_currentQuestionIndex);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundBeige,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text(_formatTime(_secondsRemaining), style: const TextStyle(fontFamily: 'Cairo')),
+        title: Text(_formatTime(_secondsRemaining), style: TextStyle(fontFamily: 'Cairo', color: colorScheme.onSurface)),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textDark,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -314,8 +321,8 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
             children: [
               LinearProgressIndicator(
                 value: _answeredIndices.length / _questions.length,
-                backgroundColor: Colors.grey[200],
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.sapphireBlue),
+                backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
+                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
                 minHeight: 8,
               ),
               Padding(
@@ -323,8 +330,8 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('سؤال ${_currentQuestionIndex + 1} من ${_questions.length}', style: const TextStyle(fontFamily: 'Cairo')),
-                    Text('تمت الإجابة: ${_answeredIndices.length}', style: const TextStyle(fontFamily: 'Cairo')),
+                    Text('سؤال ${_currentQuestionIndex + 1} من ${_questions.length}', style: TextStyle(fontFamily: 'Cairo', color: colorScheme.onSurface)),
+                    Text('تمت الإجابة: ${_answeredIndices.length}', style: TextStyle(fontFamily: 'Cairo', color: colorScheme.onSurface)),
                   ],
                 ),
               ),
@@ -340,12 +347,13 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
               ),
               child: Text(
                 question['question'],
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textDark, fontFamily: 'Cairo'),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontFamily: 'Cairo'),
               ),
             ),
             const SizedBox(height: 24),
@@ -391,12 +399,14 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
   }
 
   Widget _buildOption(int index, Map<String, dynamic> question) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final bool isAnswered = _answeredIndices.contains(_currentQuestionIndex);
     final bool isCorrect = index == question['correctIndex'];
     final bool isSelected = _selectedAnswerIndex == index;
 
-    Color borderColor = Colors.grey[300]!;
-    Color bgColor = Colors.white;
+    Color borderColor = colorScheme.onSurface.withValues(alpha: 0.1);
+    Color bgColor = colorScheme.surface;
 
     if (isAnswered) {
       if (isCorrect) {

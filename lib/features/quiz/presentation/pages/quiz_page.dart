@@ -55,15 +55,17 @@ class _QuizPageState extends State<QuizPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final question = _questions[_currentQuestionIndex];
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundBeige,
+      backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
           Positioned.fill(
             child: Opacity(
-              opacity: 0.03,
+              opacity: theme.brightness == Brightness.dark ? 0.01 : 0.03,
               child: AppNetworkImage(
                 url: 'https://www.transparenttextures.com/patterns/islamic-art.png',
               ),
@@ -97,23 +99,25 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildCircleIcon(Icons.add, AppColors.textDark),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A3928),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'تحدي اليوم',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'Cairo'),
+                  style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'Cairo'),
                 ),
                 const SizedBox(width: 8),
                 Container(
@@ -127,9 +131,9 @@ class _QuizPageState extends State<QuizPage> {
           ),
           Row(
             children: [
-              _buildCircleIcon(Icons.wb_sunny_outlined, const Color(0xFFBCA371)),
+              _buildCircleIcon(context, Icons.bookmark_border_rounded, colorScheme.onSurface),
               const SizedBox(width: 10),
-              _buildCircleIcon(Icons.close, AppColors.textDark, onTap: () => context.pop()),
+              _buildCircleIcon(context, Icons.close_rounded, colorScheme.onSurface, onTap: () => context.pop()),
             ],
           ),
         ],
@@ -137,26 +141,30 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  Widget _buildCircleIcon(IconData icon, Color color, {VoidCallback? onTap}) {
+  Widget _buildCircleIcon(BuildContext context, IconData icon, Color color, {VoidCallback? onTap}) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+        decoration: BoxDecoration(color: theme.colorScheme.surface, shape: BoxShape.circle),
         child: Icon(icon, color: color, size: 20),
       ),
     );
   }
 
   Widget _buildQuizCard(Map<String, dynamic> question) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -173,7 +181,7 @@ class _QuizPageState extends State<QuizPage> {
                 const Icon(Icons.history_toggle_off, color: Colors.grey, size: 20),
                 Text(
                   'السؤال ${_currentQuestionIndex + 1} من ${_questions.length}',
-                  style: const TextStyle(fontSize: 13, color: AppColors.textLight, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+                  style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
                 ),
               ],
             ),
@@ -185,10 +193,10 @@ class _QuizPageState extends State<QuizPage> {
             child: Text(
               question['question'],
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: colorScheme.onSurface,
                 fontFamily: 'Cairo',
                 height: 1.4,
               ),
@@ -244,12 +252,14 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   Widget _buildOption(int index, String text, int correctIndex) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isSelected = _selectedAnswerIndex == index;
     final isCorrect = index == correctIndex;
     
-    Color bgColor = Colors.white;
-    Color textColor = AppColors.textDark;
-    Border? border = Border.all(color: Colors.grey.withValues(alpha: 0.2));
+    Color bgColor = colorScheme.surface;
+    Color textColor = colorScheme.onSurface;
+    Border? border = Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1));
 
     if (_hasAnswered) {
       if (isCorrect) {
@@ -306,10 +316,11 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   Widget _buildActionIcon(IconData icon) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-      child: Icon(icon, color: Colors.grey.withValues(alpha: 0.6), size: 22),
+      decoration: BoxDecoration(color: theme.colorScheme.surface, shape: BoxShape.circle),
+      child: Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 22),
     );
   }
 

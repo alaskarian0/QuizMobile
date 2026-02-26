@@ -5,5 +5,7 @@ export 'question_provider.dart';
 export 'quiz_provider.dart';
 export 'user_provider.dart';
 export 'badge_provider.dart';
+export 'achievement_provider.dart';
+export 'library_provider.dart';
 export 'reel_provider.dart';
 export 'answer_history_provider.dart';

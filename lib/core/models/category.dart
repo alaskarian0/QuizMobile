@@ -1,3 +1,5 @@
+import 'stage.dart';
+
 /// Category model
 class Category {
   final String id;
@@ -7,6 +9,8 @@ class Category {
   final String? color;
   final String? description;
   final int questionCount;
+  final bool showOnHome;
+  final List<Stage> stages;
 
   Category({
     required this.id,
@@ -16,6 +20,8 @@ class Category {
     this.color,
     this.description,
     this.questionCount = 0,
+    this.showOnHome = false,
+    this.stages = const [],
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
@@ -28,6 +34,11 @@ class Category {
       description: json['description'] as String?,
       questionCount: json['questionCount'] as int? ??
                     (json['questions'] as List?)?.length ?? 0,
+      showOnHome: json['showOnHome'] as bool? ?? false,
+      stages: (json['stages'] as List?)
+              ?.map((e) => Stage.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
@@ -40,6 +51,8 @@ class Category {
       'color': color,
       'description': description,
       'questionCount': questionCount,
+      'showOnHome': showOnHome,
+      'stages': stages.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -51,6 +64,8 @@ class Category {
     String? color,
     String? description,
     int? questionCount,
+    bool? showOnHome,
+    List<Stage>? stages,
   }) {
     return Category(
       id: id ?? this.id,
@@ -60,6 +75,8 @@ class Category {
       color: color ?? this.color,
       description: description ?? this.description,
       questionCount: questionCount ?? this.questionCount,
+      showOnHome: showOnHome ?? this.showOnHome,
+      stages: stages ?? this.stages,
     );
   }
 }

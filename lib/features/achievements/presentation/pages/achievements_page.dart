@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/providers/achievement_provider.dart';
+import '../../../../core/models/user.dart';
 
 /// Achievements Page - Page showing completed achievements and goals
-class AchievementsPage extends StatelessWidget {
+class AchievementsPage extends ConsumerWidget {
   const AchievementsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    // Watch achievement stats and daily achievements
+    final statsAsync = ref.watch(achievementStatsProvider);
+    final dailyAchievementsAsync = ref.watch(dailyAchievementsProvider);
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SafeArea(
@@ -18,13 +27,13 @@ class AchievementsPage extends StatelessWidget {
               const SizedBox(height: 20),
               _buildMainCard(),
               const SizedBox(height: 16),
-              _buildSummaryCard(),
+              _buildSummaryCard(statsAsync),
               const SizedBox(height: 16),
-              _buildGoalsCard(),
+              _buildGoalsCard(dailyAchievementsAsync),
               const SizedBox(height: 20),
               _buildCTAButton(),
               const SizedBox(height: 16),
-              _buildStatsCards(),
+              _buildStatsCards(statsAsync),
               const SizedBox(height: 20),
             ],
           ),
@@ -50,7 +59,7 @@ class AchievementsPage extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              // Navigate to detailed achievements page
+              Navigator.pop(context);
             },
             child: Container(
               padding: const EdgeInsets.all(8),
@@ -132,52 +141,63 @@ class AchievementsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildSummaryCard(AsyncValue<Map<String, dynamic>> statsAsync) {
+    return statsAsync.when(
+      data: (stats) {
+        final completed = stats['completed'] ?? 0;
+        final total = stats['total'] ?? 0;
+        final totalXpEarned = stats['totalXpEarned'] ?? 0;
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
+          child: Column(
+            children: [
+              _buildSummaryItem(
+                Icons.star,
+                'الإنجازات المكتملة',
+                '$completed / $total',
+                const Color(0xFFFFD700),
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryItem(
+                Icons.card_giftcard,
+                'المكافآت',
+                '$totalXpEarned XP مكتسب',
+                const Color(0xFFFF6B35),
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryItem(
+                Icons.military_tech,
+                'الإنجازات',
+                'اجمع النقاط، اكتسب خبرة، واحصل على هدايا مميزة',
+                const Color(0xFF2196F3),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
       ),
-      child: Column(
-        children: [
-          _buildSummaryItem(
-            Icons.star,
-            'الإنجازات المكتملة',
-            '100 نقطة',
-            const Color(0xFFFFD700),
-          ),
-          const SizedBox(height: 16),
-          _buildSummaryItem(
-            Icons.access_time,
-            'الإنجازات اليومية',
-            '100 نقطة (يومياً)',
-            const Color(0xFF9C27B0),
-          ),
-          const SizedBox(height: 16),
-          _buildSummaryItem(
-            Icons.card_giftcard,
-            'المكافآت',
-            '1500 XP عند اكتمال الإنجازات',
-            const Color(0xFFFF6B35),
-          ),
-          const SizedBox(height: 16),
-          _buildSummaryItem(
-            Icons.military_tech,
-            'الإنجازات',
-            'اجمع النقاط، اكتسب خبرة، واحصل على هدايا مميزة',
-            const Color(0xFF2196F3),
-          ),
-        ],
-      ),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
@@ -193,7 +213,7 @@ class AchievementsPage extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.15).withOpacity(0.15),
+            color: iconColor.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -232,101 +252,158 @@ class AchievementsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalsCard() {
-    final goals = [
-      'اكمل جميع الإنجازات اليومية',
-      'سجل دخول لمدة 8 أيام متتالية',
-      'اكمل 10 إنجازات لتحصل على مكافأة خاصة',
-      'الكل',
-    ];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildGoalsCard(AsyncValue<List<Achievement>> achievementsAsync) {
+    return achievementsAsync.when(
+      data: (achievements) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'أهداف الإنجازات',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-              fontFamily: 'Cairo',
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...goals.map((goal) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        color: AppColors.forestGreen,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        goal,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: AppColors.textDark,
-                          fontFamily: 'Cairo',
-                        ),
-                      ),
-                    ),
-                  ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'أهداف الإنجازات',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                  fontFamily: 'Cairo',
                 ),
-              )),
-        ],
+              ),
+              const SizedBox(height: 16),
+              if (achievements.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'لا توجد إنجازات متاحة حالياً',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF757575),
+                      fontFamily: 'Cairo',
+                    ),
+                  ),
+                )
+              else
+                ...achievements.take(4).map((achievement) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildGoalItem(achievement),
+                    )),
+            ],
+          ),
+        );
+      },
+      loading: () => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
       ),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildGoalItem(Achievement achievement) {
+    final isCompleted = achievement.completed;
+    final progress = achievement.progress ?? 0;
+    final targetValue = achievement.targetValue ?? 1;
+    final progressPercent = (progress / targetValue).clamp(0.0, 1.0);
+
+    return Row(
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: isCompleted == true
+                ? AppColors.forestGreen
+                : AppColors.forestGreen.withValues(alpha: 0.3),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            isCompleted == true ? Icons.check : Icons.radio_button_unchecked,
+            color: Colors.white,
+            size: 16,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                achievement.displayTitle,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textDark,
+                  fontFamily: 'Cairo',
+                ),
+              ),
+              if (!isCompleted) ...[
+                const SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: progressPercent,
+                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.forestGreen,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$progress / $targetValue',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF757575),
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildCTAButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: () {
-            // Navigate to achievements list or start achievements
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.forestGreen,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+      child: Builder(
+        builder: (context) => SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: () {
+              context.push('/leaderboard');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.forestGreen,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
             ),
-            elevation: 0,
-          ),
-          child: const Text(
-            'ابدأ الإنجازات!',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Cairo',
+            child: const Text(
+              'ابدأ الإنجازات!',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Cairo',
+              ),
             ),
           ),
         ),
@@ -334,30 +411,40 @@ class AchievementsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsCards() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatCard(
-              Icons.emoji_events,
-              'الإنجازات',
-              '2,847',
-              const Color(0xFFFF6B35),
-            ),
+  Widget _buildStatsCards(AsyncValue<Map<String, dynamic>> statsAsync) {
+    return statsAsync.when(
+      data: (stats) {
+        final total = stats['total'] ?? 0;
+        final completed = stats['completed'] ?? 0;
+        final inProgress = stats['inProgress'] ?? 0;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  Icons.emoji_events,
+                  'الإنجازات',
+                  '$completed / $total',
+                  const Color(0xFFFF6B35),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatCard(
+                  Icons.calendar_today,
+                  'قيد التنفيذ',
+                  '$inProgress',
+                  const Color(0xFF10B981),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildStatCard(
-              Icons.calendar_today,
-              'أيام متتالية',
-              '30',
-              const Color(0xFF10B981),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

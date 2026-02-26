@@ -81,3 +81,10 @@ final categoryByIdProvider = Provider.family<Category?, String>((ref, id) {
     return null;
   }
 });
+
+/// Category with stages provider
+final categoryWithStagesProvider = FutureProvider.family<Category, String>((ref, id) async {
+  final categoryService = ref.watch(categoryServiceProvider);
+  return await categoryService.getCategoryById(id);
+});
+

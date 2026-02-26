@@ -59,17 +59,17 @@ class SettingsPage extends ConsumerWidget {
               icon: Icons.person_outline,
               iconColor: const Color(0xFF2196F3),
               children: [
-                _buildSettingsItem(
+                _buildSettingsItem(context,
                   icon: Icons.edit_outlined,
                   title: 'تعديل الملف الشخصي',
-                  onTap: () {},
+                  onTap: () => context.push('/profile/settings/edit-profile'),
                 ),
-                _buildSettingsItem(
+                _buildSettingsItem(context,
                   icon: Icons.email_outlined,
                   title: 'تغيير البريد الإلكتروني',
                   onTap: () {},
                 ),
-                _buildSettingsItem(
+                _buildSettingsItem(context,
                   icon: Icons.lock_outlined,
                   title: 'تغيير كلمة المرور',
                   onTap: () {},
@@ -83,14 +83,14 @@ class SettingsPage extends ConsumerWidget {
               icon: Icons.notifications_outlined,
               iconColor: const Color(0xFFF59E0B),
               children: [
-                _buildSwitchItem(
+                _buildSwitchItem(context,
                   icon: Icons.notifications_active,
                   title: 'إشعارات التذكير',
                   subtitle: 'تلقي تذكيرات يومية',
                   value: true,
                   onChanged: (value) {},
                 ),
-                _buildSwitchItem(
+                _buildSwitchItem(context,
                   icon: Icons.campaign,
                   title: 'العرض والعروض',
                   subtitle: 'إشعارات العروض الخاصة',
@@ -106,17 +106,17 @@ class SettingsPage extends ConsumerWidget {
               icon: Icons.support_agent_outlined,
               iconColor: const Color(0xFF10B981),
               children: [
-                _buildSettingsItem(
+                _buildSettingsItem(context,
                   icon: Icons.help_outline,
                   title: 'مركز المساعدة',
                   onTap: () {},
                 ),
-                _buildSettingsItem(
+                _buildSettingsItem(context,
                   icon: Icons.contact_support_outlined,
                   title: 'اتصل بنا',
                   onTap: () {},
                 ),
-                _buildSettingsItem(
+                _buildSettingsItem(context,
                   icon: Icons.info_outline,
                   title: 'حول التطبيق',
                   onTap: () {},
@@ -139,13 +139,16 @@ class SettingsPage extends ConsumerWidget {
     required Color iconColor,
     required List<Widget> children,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -170,17 +173,17 @@ class SettingsPage extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: colorScheme.onSurface,
                     fontFamily: 'Cairo',
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: colorScheme.onSurface.withValues(alpha: 0.1)),
           ...children,
         ],
       ),
@@ -192,6 +195,9 @@ class SettingsPage extends ConsumerWidget {
     WidgetRef ref,
     bool isDarkMode,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -212,7 +218,7 @@ class SettingsPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -221,16 +227,16 @@ class SettingsPage extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textDark,
+                    color: colorScheme.onSurface,
                     fontFamily: 'Cairo',
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   'تفعيل المظهر الداكن للتطبيق',
                   style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textLight,
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                     fontFamily: 'Cairo',
                   ),
                 ),
@@ -260,11 +266,15 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSettingsItem({
+  Widget _buildSettingsItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -284,17 +294,17 @@ class SettingsPage extends ConsumerWidget {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textDark,
+                  color: colorScheme.onSurface,
                   fontFamily: 'Cairo',
                 ),
               ),
             ),
             Icon(
               Icons.arrow_back_ios,
-              color: Colors.grey[400],
+              color: colorScheme.onSurface.withValues(alpha: 0.4),
               size: 18,
             ),
           ],
@@ -303,13 +313,17 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSwitchItem({
+  Widget _buildSwitchItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
@@ -330,19 +344,19 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textDark,
+                    color: colorScheme.onSurface,
                     fontFamily: 'Cairo',
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textLight,
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                     fontFamily: 'Cairo',
                   ),
                 ),

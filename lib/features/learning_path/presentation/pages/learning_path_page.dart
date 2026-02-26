@@ -8,38 +8,62 @@ class LearningPathPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundBeige,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'المسار التعليمي',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
+            color: colorScheme.onSurface,
+            fontFamily: 'Cairo',
           ),
         ),
-        automaticallyImplyLeading: false, // Remove automatic back button
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings_outlined, color: colorScheme.onSurface),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.nightlight_round, color: colorScheme.onSurface),
+            onPressed: () {},
+          ),
+        ],
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: colorScheme.onSurface.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.person_outline, color: colorScheme.onSurface),
+        ),
       ),
       body: SafeArea(
         child: Column(
           children: [
+            _buildStatsBar(colorScheme),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 children: [
                   _buildUnitHeader(
+                    context,
                     title: 'أصول الدين الخمسة',
                     description: 'التوحيد، العدل، النبوة، الإمامة، المعاد',
                     icon: '⭐',
-                    color: AppColors.forestGreen,
+                    color: AppColors.emeraldGreen,
                   ),
                   _buildPathNodes(context),
                   const SizedBox(height: 40),
                   _buildUnitHeader(
+                    context,
                     title: 'الأئمة المعصومون',
                     description: 'تعرف على الأئمة الاثني عشر',
                     icon: '✨',
@@ -55,21 +79,56 @@ class LearningPathPage extends StatelessWidget {
     );
   }
 
-  Widget _buildUnitHeader({
+  Widget _buildStatsBar(ColorScheme colorScheme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          _buildStatItem('XP 45', Icons.star, Colors.amber),
+          const SizedBox(width: 16),
+          _buildStatItem('7', Icons.local_fire_department, Colors.orange),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, IconData icon, Color color) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            fontFamily: 'Cairo',
+          ),
+        ),
+        const SizedBox(width: 4),
+        Icon(icon, color: color, size: 24),
+      ],
+    );
+  }
+
+  Widget _buildUnitHeader(
+    BuildContext context, {
     required String title,
     required String description,
     required String icon,
     required Color color,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -98,17 +157,19 @@ class LearningPathPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: colorScheme.onSurface,
+                    fontFamily: 'Cairo',
                   ),
                 ),
                 Text(
                   description,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textLight,
+                    color: colorScheme.onSurfaceVariant,
+                    fontFamily: 'Cairo',
                   ),
                 ),
               ],
@@ -166,13 +227,15 @@ class LearningPathPage extends StatelessWidget {
     required String type,
     required int xp,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final bool isLocked = state == 'locked';
     final bool isActive = state == 'active';
     final bool isCompleted = state == 'completed';
 
-    Color nodeColor = isLocked ? Colors.grey[300]! : AppColors.forestGreen;
-    if (isCompleted) nodeColor = AppColors.forestGreen;
-    if (isActive) nodeColor = AppColors.forestGreen;
+    Color nodeColor = isLocked ? colorScheme.onSurface.withValues(alpha: 0.1) : colorScheme.primary;
+    if (isCompleted) nodeColor = AppColors.emeraldGreen;
+    if (isActive) nodeColor = AppColors.emeraldGreen;
 
     IconData icon;
     switch (type) {
@@ -234,18 +297,30 @@ class LearningPathPage extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isLocked ? Colors.grey : AppColors.textDark,
+            color: isLocked ? colorScheme.onSurface.withValues(alpha: 0.3) : colorScheme.onSurface,
+            fontFamily: 'Cairo',
           ),
         ),
         Text(
-          '$xp XP',
+          'XP $xp',
           style: TextStyle(
             fontSize: 12,
-            color: isLocked ? Colors.grey : AppColors.goldenYellow,
+            fontWeight: FontWeight.bold,
+            color: isLocked ? colorScheme.onSurface.withValues(alpha: 0.2) : colorScheme.onSurfaceVariant,
+            fontFamily: 'Cairo',
           ),
         ),
+        if (!isLocked)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(3, (i) => Icon(
+              Icons.star,
+              size: 14,
+              color: i < 2 ? Colors.amber : Colors.grey[400],
+            )),
+          ),
       ],
     );
   }

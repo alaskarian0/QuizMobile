@@ -202,15 +202,21 @@ class UserStats {
 class Badge {
   final String id;
   final String name;
+  final String? nameAr;
   final String? description;
   final String? icon;
+  final int? xpReward;
+  final String? category;
   final DateTime? earnedAt;
 
   Badge({
     required this.id,
     required this.name,
+    this.nameAr,
     this.description,
     this.icon,
+    this.xpReward,
+    this.category,
     this.earnedAt,
   });
 
@@ -218,13 +224,82 @@ class Badge {
     return Badge(
       id: json['id'] as String,
       name: json['name'] as String,
+      nameAr: json['nameAr'] as String?,
       description: json['description'] as String?,
       icon: json['icon'] as String?,
+      xpReward: json['xpReward'] as int?,
+      category: json['category'] as String?,
       earnedAt: json['earnedAt'] != null
           ? DateTime.parse(json['earnedAt'] as String)
           : null,
     );
   }
+
+  /// Get display name (prefer Arabic)
+  String get displayName => nameAr?.isNotEmpty == true ? nameAr! : name;
+}
+
+/// Achievement model
+class Achievement {
+  final String id;
+  final String title;
+  final String? titleAr;
+  final String? description;
+  final String? icon;
+  final String type;
+  final int? xpReward;
+  final int? targetValue;
+  final String? category;
+  final int? progress;
+  final bool? isCompleted;
+  final DateTime? completedAt;
+
+  Achievement({
+    required this.id,
+    required this.title,
+    this.titleAr,
+    this.description,
+    this.icon,
+    required this.type,
+    this.xpReward,
+    this.targetValue,
+    this.category,
+    this.progress,
+    this.isCompleted,
+    this.completedAt,
+  });
+
+  factory Achievement.fromJson(Map<String, dynamic> json) {
+    return Achievement(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      titleAr: json['titleAr'] as String?,
+      description: json['description'] as String?,
+      icon: json['icon'] as String?,
+      type: json['type'] as String? ?? 'DAILY',
+      xpReward: json['xpReward'] as int?,
+      targetValue: json['targetValue'] as int?,
+      category: json['category'] as String?,
+      progress: json['progress'] as int?,
+      isCompleted: json['isCompleted'] as bool?,
+      completedAt: json['completedAt'] != null
+          ? DateTime.parse(json['completedAt'] as String)
+          : null,
+    );
+  }
+
+  /// Get display title (prefer Arabic)
+  String get displayTitle => titleAr?.isNotEmpty == true ? titleAr! : title;
+
+  /// Get progress percentage (0.0 to 1.0)
+  double get progressPercentage {
+    if (targetValue == null || targetValue == 0) return 0.0;
+    final currentProgress = progress ?? 0;
+    return (currentProgress / targetValue!).clamp(0.0, 1.0);
+  }
+
+  /// Check if achievement is fully completed
+  bool get completed => isCompleted ?? false;
 }
 
 /// Leaderboard entry

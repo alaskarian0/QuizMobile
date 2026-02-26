@@ -11,17 +11,20 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/contest/presentation/pages/monthly_contest_page.dart';
 import '../../features/categories/presentation/pages/categories_page.dart';
+import '../../features/categories/presentation/pages/category_path_page.dart';
 import '../../features/reels/presentation/pages/reels_page.dart';
 import '../../features/answer_history/presentation/pages/answer_history_page.dart';
 import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
+import '../../features/library/presentation/pages/content_list_page.dart';
 import 'scaffold_with_nav.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
   static final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
+  static final _pathNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'path');
   static final _libraryNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'library');
-  static final _achievementsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'achievements');
   static final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 
   static final router = GoRouter(
@@ -52,6 +55,13 @@ class AppRouter {
                     path: 'categories',
                     builder: (context, state) => const CategoriesPage(),
                     routes: [
+                      GoRoute(
+                        path: 'path/:id',
+                        builder: (context, state) {
+                          final categoryId = state.pathParameters['id'] ?? '';
+                          return CategoryPathPage(categoryId: categoryId);
+                        },
+                      ),
                       GoRoute(
                         path: ':id',
                         builder: (context, state) {
@@ -88,23 +98,36 @@ class AppRouter {
             ],
           ),
           StatefulShellBranch(
+            navigatorKey: _pathNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/path',
+                builder: (context, state) => const LearningPathPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
             navigatorKey: _libraryNavigatorKey,
             routes: [
               GoRoute(
                 path: '/library',
                 builder: (context, state) => const LibraryPage(),
+                routes: [
+                  GoRoute(
+                    path: 'content',
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>?;
+                      return ContentListPage(
+                        title: extra?['title'] ?? 'المحتوى',
+                        category: extra?['category'] ?? 'articles',
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-          StatefulShellBranch(
-            navigatorKey: _achievementsNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/achievements',
-                builder: (context, state) => const AchievementsPage(),
-              ),
-            ],
-          ),
+
           StatefulShellBranch(
             navigatorKey: _profileNavigatorKey,
             routes: [
@@ -123,6 +146,12 @@ class AppRouter {
                   GoRoute(
                     path: 'settings',
                     builder: (context, state) => const SettingsPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'edit-profile',
+                        builder: (context, state) => const EditProfilePage(),
+                      ),
+                    ],
                   ),
                 ],
               ),

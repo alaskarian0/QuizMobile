@@ -13,6 +13,13 @@ class AnswerHistoryService {
   Future<List<AnswerHistory>> getMyHistory() async {
     try {
       final response = await _apiClient.get('/answer-history');
+
+      // Handle 401 Unauthorized - user not logged in
+      if (response.statusCode == 401) {
+        debugPrint('User not authenticated for answer history');
+        return [];
+      }
+
       final data = _apiClient.handleResponse(response);
 
       if (data is Map && data.containsKey('data')) {
@@ -23,7 +30,8 @@ class AnswerHistoryService {
       return [];
     } catch (e) {
       debugPrint('Error fetching answer history: $e');
-      rethrow;
+      // Return empty list on error instead of throwing
+      return [];
     }
   }
 
@@ -31,16 +39,43 @@ class AnswerHistoryService {
   Future<AnswerStats> getMyStats() async {
     try {
       final response = await _apiClient.get('/answer-history/stats');
+
+      // Handle 401 Unauthorized - user not logged in
+      if (response.statusCode == 401) {
+        debugPrint('User not authenticated for answer stats');
+        return AnswerStats(
+          total: 0,
+          correct: 0,
+          incorrect: 0,
+          accuracy: 0.0,
+          totalXP: 0,
+        );
+      }
+
       final data = _apiClient.handleResponse(response);
 
       if (data is Map && data.containsKey('data')) {
         return AnswerStats.fromJson(data['data']);
       }
 
-      throw Exception('Invalid response format');
+      // Return default stats on invalid response
+      return AnswerStats(
+        total: 0,
+        correct: 0,
+        incorrect: 0,
+        accuracy: 0.0,
+        totalXP: 0,
+      );
     } catch (e) {
       debugPrint('Error fetching answer stats: $e');
-      rethrow;
+      // Return default stats on error
+      return AnswerStats(
+        total: 0,
+        correct: 0,
+        incorrect: 0,
+        accuracy: 0.0,
+        totalXP: 0,
+      );
     }
   }
 
@@ -65,6 +100,13 @@ class AnswerHistoryService {
   Future<List<AnswerHistory>> getIncorrectAnswers() async {
     try {
       final response = await _apiClient.get('/answer-history/incorrect');
+
+      // Handle 401 Unauthorized - user not logged in
+      if (response.statusCode == 401) {
+        debugPrint('User not authenticated for incorrect answers');
+        return [];
+      }
+
       final data = _apiClient.handleResponse(response);
 
       if (data is Map && data.containsKey('data')) {
@@ -75,7 +117,8 @@ class AnswerHistoryService {
       return [];
     } catch (e) {
       debugPrint('Error fetching incorrect answers: $e');
-      rethrow;
+      // Return empty list on error instead of throwing
+      return [];
     }
   }
 

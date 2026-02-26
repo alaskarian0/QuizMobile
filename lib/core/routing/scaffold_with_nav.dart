@@ -19,12 +19,10 @@ class ScaffoldWithNav extends StatelessWidget {
       bottomNavigationBar: Container(
         height: 85,
         decoration: BoxDecoration(
-          color: theme.brightness == Brightness.dark
-              ? const Color(0xFF2C2C2C)
-              : Colors.white,
+          color: colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.04),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -44,16 +42,16 @@ class ScaffoldWithNav extends StatelessWidget {
               _buildNavItem(
                 context,
                 index: 1,
-                icon: Icons.menu_book_outlined,
-                activeIcon: Icons.menu_book_rounded,
-                label: 'المكتبة',
+                icon: Icons.map_outlined,
+                activeIcon: Icons.map_rounded,
+                label: 'المسار',
               ),
               _buildNavItem(
                 context,
                 index: 2,
-                icon: Icons.emoji_events_outlined,
-                activeIcon: Icons.emoji_events_rounded,
-                label: 'الإنجازات',
+                icon: Icons.book_outlined,
+                activeIcon: Icons.book_rounded,
+                label: 'المكتبة',
               ),
               _buildNavItem(
                 context,

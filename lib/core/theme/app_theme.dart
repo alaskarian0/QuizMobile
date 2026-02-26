@@ -14,6 +14,7 @@ class AppTheme {
         primary: AppColors.forestGreen,
         secondary: AppColors.goldenYellow,
         surface: AppColors.backgroundBeige,
+        surfaceContainerHighest: AppColors.surfaceWhite,
         error: AppColors.errorRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
@@ -60,38 +61,40 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF4CAF50),
-        brightness: Brightness.dark,
-      ).copyWith(
-        primary: const Color(0xFF4CAF50),
-        secondary: const Color(0xFFFFD54F),
-        surface: const Color(0xFF1E1E1E),
-        error: const Color(0xFFEF5350),
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFF10B981),
+        secondary: Color(0xFFBCA371),
+        surface: Color(0xFF0A1F1D),
+        surfaceContainerHighest: Color(0xFF1A3F3C),
+        onSurface: Colors.white,
+        onSurfaceVariant: Colors.white70,
+        error: Color(0xFFEF5350),
         onPrimary: Colors.white,
-        onSecondary: Colors.black,
-        onSurface: Colors.white70,
+        onSecondary: Colors.white,
         onError: Colors.white,
       ),
-      scaffoldBackgroundColor: const Color(0xFF121212),
+      scaffoldBackgroundColor: const Color(0xFF0A1F1D),
       textTheme: GoogleFonts.tajawalTextTheme(ThemeData.dark().textTheme).copyWith(
         displayLarge: GoogleFonts.tajawal(
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
         bodyLarge: GoogleFonts.tajawal(
+          color: Colors.white,
+        ),
+        bodyMedium: GoogleFonts.tajawal(
           color: Colors.white70,
         ),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white70,
+        foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4CAF50),
+          backgroundColor: const Color(0xFF10B981),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -100,11 +103,12 @@ class AppTheme {
         ),
       ),
       cardTheme: CardTheme(
-        color: const Color(0xFF2C2C2C),
+        color: const Color(0xFF112C2A),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
-        elevation: 2,
+        elevation: 4,
+        shadowColor: Colors.black.withValues(alpha: 0.4),
       ),
     );
   }
