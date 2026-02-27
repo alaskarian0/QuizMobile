@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/category.dart';
 import '../services/category_service.dart';
+import 'auth_provider.dart';
 
 /// Category Service provider
 final categoryServiceProvider = Provider<CategoryService>((ref) {
-  return CategoryService();
+  final apiClient = ref.watch(apiClientProvider);
+  return CategoryService(apiClient: apiClient);
 });
 
 /// Categories State

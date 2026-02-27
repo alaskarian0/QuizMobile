@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../api/api_client.dart';
+import '../providers/auth_provider.dart';
 
 /// A reusable network image widget with a shimmer skeleton loading effect.
 ///
 /// Automatically shows a shimmer placeholder while the image loads,
 /// and a fallback icon if the image fails to load.
-class AppNetworkImage extends StatelessWidget {
+class AppNetworkImage extends ConsumerWidget {
   const AppNetworkImage({
     super.key,
     required this.url,
@@ -32,11 +35,18 @@ class AppNetworkImage extends StatelessWidget {
   final Color? backgroundColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final baseUrl = ref.watch(apiClientProvider).baseUrl;
+    final normalizedUrl = ApiClient.normalizeUrl(url, baseUrl);
+
+    if (normalizedUrl.isEmpty) {
+      return _buildErrorFallback();
+    }
+
     return ClipRRect(
       borderRadius: borderRadius,
       child: Image.network(
-        url,
+        normalizedUrl,
         width: width,
         height: height,
         fit: fit,

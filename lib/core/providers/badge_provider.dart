@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
 import '../services/badge_service.dart';
+import 'auth_provider.dart';
 
 /// Badge Service provider
 final badgeServiceProvider = Provider<BadgeService>((ref) {
-  return BadgeService();
+  final apiClient = ref.watch(apiClientProvider);
+  return BadgeService(apiClient: apiClient);
 });
 
 /// All badges provider

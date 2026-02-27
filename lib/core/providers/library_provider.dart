@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/library.dart';
 import '../services/library_service.dart';
+import 'auth_provider.dart';
 
 /// Library Service provider
 final libraryServiceProvider = Provider<LibraryService>((ref) {
-  return LibraryService();
+  final apiClient = ref.watch(apiClientProvider);
+  return LibraryService(apiClient: apiClient);
 });
 
 // ==================== ARTICLES ====================

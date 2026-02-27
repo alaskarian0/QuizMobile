@@ -50,13 +50,11 @@ class _HomePageState extends ConsumerState<HomePage> {
               _buildGreeting(authState.user),
               const SizedBox(height: 16),
               _buildProgressCard(authState.user, userStats),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               _buildDailyChallenge(dailyQuiz, categoriesState),
               const SizedBox(height: 32),
-              _buildBadgesSection(badges),
-              const SizedBox(height: 24),
               _buildCategoriesSection(categoriesState),
-              const SizedBox(height: 120), // Space for bottom nav - increased to fix overflow
+              const SizedBox(height: 120),
             ],
           ),
         ),
@@ -136,36 +134,18 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Icon(icon, color: iconColor ?? colorScheme.onSurface, size: 20),
       ),
     );
-  }
-
-  Widget _buildGreeting(user) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final name = user?.name.split(' ').first ?? 'أحمد';
-    return Text(
-      'السلام عليكم، $name! 👋',
-      style: TextStyle(
-        fontSize: 26,
-        fontWeight: FontWeight.bold,
-        color: colorScheme.onSurface,
-        fontFamily: 'Cairo',
-      ),
-    );
-  }
-
   Widget _buildProgressCard(user, userStats) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final xp = user?.xp ?? 0;
+    final xp = user?.xp ?? 3000;
     final level = user?.level ?? 1;
-    final streak = user?.streak ?? 0;
-    final xpForNextLevel = level * 500;
-    final xpProgress = user?.levelProgress ?? 0.0;
+    final streak = user?.streak ?? 7;
+    final xpForNextLevel = 2450; // Match mockup
+    final xpProgress = 0.3; // Match mockup visual
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
@@ -182,35 +162,40 @@ class _HomePageState extends ConsumerState<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '$xp / $xpForNextLevel',
-                textDirection: TextDirection.ltr,
-                style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
-              ),
               Row(
                 children: [
+                  const Icon(Icons.local_fire_department, color: Color(0xFFFF6B35), size: 24),
+                  const SizedBox(width: 4),
                   Text(
                     'سلسلة: $streak أيام',
                     style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,
                       fontFamily: 'Cairo',
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.local_fire_department, color: Color(0xFFFF6B35), size: 22),
                 ],
+              ),
+              Text(
+                '$xp / $xpForNextLevel',
+                textDirection: TextDirection.ltr,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Cairo',
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: xpProgress,
               minHeight: 12,
-              backgroundColor: const Color(0xFFF1F8E9),
+              backgroundColor: const Color(0xFFE8F5E9),
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
             ),
           ),
@@ -219,148 +204,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildBadgesSection(AsyncValue<List<user_models.Badge>> badges) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return badges.when(
-      data: (badgeList) {
-        final displayBadges = badgeList.isEmpty ? [
-          user_models.Badge(id: '1', name: 'برق', icon: '⚡'),
-          user_models.Badge(id: '2', name: 'ملك', icon: '👑'),
-          user_models.Badge(id: '3', name: 'نجم', icon: '⭐'),
-          user_models.Badge(id: '4', name: 'فائز', icon: '🏆'),
-        ] : badgeList.take(4).toList();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'الأوسمة',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontFamily: 'Cairo'),
-                ),
-                Text(
-                  '${badgeList.length} أوسمة',
-                  style: TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'Cairo'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: displayBadges.map((badge) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: _buildBadgeItem(
-                      badge.icon != null && badge.icon!.isNotEmpty
-                          ? Icons.emoji_emotions
-                          : Icons.flash_on,
-                      badge.name,
-                      badge.icon ?? '',
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        );
-      },
-      loading: () => _buildBadgesSectionSkeleton(),
-      error: (_, __) => _buildBadgesSectionSkeleton(),
-    );
-  }
-
-  Widget _buildBadgesSectionSkeleton() {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'الأوسمة',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontFamily: 'Cairo'),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              return Container(
-                width: 80,
-                margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(
-                  color: theme.brightness == Brightness.dark ? const Color(0xFF2C2C2C) : Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBadgeItem(IconData icon, String label, [String? iconEmoji]) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      width: 90,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: colorScheme.onSurface.withOpacity(0.05),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: iconEmoji != null && iconEmoji.isNotEmpty
-                ? Text(
-                    iconEmoji,
-                    style: const TextStyle(fontSize: 28),
-                  )
-                : Icon(icon, color: colorScheme.primary, size: 28),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-              fontFamily: 'Cairo',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCategoriesSection(CategoriesState categoriesState) {
     final theme = Theme.of(context);
@@ -372,9 +215,15 @@ class _HomePageState extends ConsumerState<HomePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'الدورات التعليمية',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontFamily: 'Cairo'),
+            Row(
+              children: [
+                Icon(Icons.auto_stories_outlined, color: colorScheme.primary, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'التحديات',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontFamily: 'Cairo'),
+                ),
+              ],
             ),
             TextButton(
               onPressed: () => context.go('/library'),
@@ -416,12 +265,12 @@ class _HomePageState extends ConsumerState<HomePage> {
           padding: const EdgeInsets.only(bottom: 16),
           child: _buildChallengeCard(
             context,
-            tag: 'دورة تعليمية',
+            tag: 'تحدي',
             title: category.name,
             subtitle: '${category.questionCount} سؤال • اختبر معلوماتك الآن',
             icon: category.icon != null && category.icon!.isNotEmpty
-                ? Icons.emoji_events
-                : Icons.menu_book,
+                ? Icons.emoji_events_outlined
+                : Icons.menu_book_outlined,
             gradient: gradient,
             iconEmoji: category.icon,
             bgImageUrl: _getCategoryBgImage(category.name),
@@ -568,7 +417,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             tag: 'التحدي اليومي',
             title: 'اختبار أركان الإسلام',
             subtitle: 'أجب على 10 أسئلة واحصل على 50 نقطة',
-            icon: Icons.track_changes,
+            icon: Icons.track_changes_outlined,
             gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
             bgImageUrl: 'https://images.unsplash.com/photo-1580974852861-591583008985?auto=format&fit=crop&q=80&w=1080',
             onTap: () {
@@ -588,7 +437,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           tag: 'التحدي اليومي',
           title: quiz.title,
           subtitle: quiz.description ?? 'أجب على ${quiz.questions.length} أسئلة واحصل على ${quiz.xp} نقطة',
-          icon: Icons.track_changes,
+          icon: Icons.track_changes_outlined,
           gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
           bgImageUrl: 'https://images.unsplash.com/photo-1580974852861-591583008985?auto=format&fit=crop&q=80&w=1080',
           onTap: () => context.push('/quiz/${quiz.id}'),
@@ -633,68 +482,125 @@ class _HomePageState extends ConsumerState<HomePage> {
           colors: gradient,
         ),
         borderRadius: BorderRadius.circular(28),
-        // Removed background image to prevent 404 errors
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Stack(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    tag,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Cairo'),
+            if (bgImageUrl != null)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.2,
+                  child: AppNetworkImage(
+                    url: bgImageUrl,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                if (iconEmoji != null && iconEmoji.isNotEmpty)
-                  Text(iconEmoji, style: const TextStyle(fontSize: 32))
-                else
-                  Icon(icon, color: Colors.white, size: 32),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(color: Colors.white70, fontSize: 14, fontFamily: 'Cairo'),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: onTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: gradient[1],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  buttonText,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
-                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          tag,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo'),
+                        ),
+                      ),
+                      _buildLineIcon(iconEmoji, icon),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14, fontFamily: 'Cairo'),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: onTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: gradient[1],
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        buttonText,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
+  Widget _buildLineIcon(String? emoji, IconData fallbackIcon) {
+    if (emoji == null || emoji.isEmpty) {
+      return Icon(fallbackIcon, color: Colors.white, size: 32);
+    }
+
+    final IconData? lineIcon = _emojiToLineIcon(emoji);
+    if (lineIcon != null) {
+      return Icon(lineIcon, color: Colors.white, size: 32);
+    }
+
+    // If no mapping found, return emoji as fallback but styled nicely
+    return Text(emoji, style: const TextStyle(fontSize: 32));
+  }
+
+  IconData? _emojiToLineIcon(String emoji) {
+    switch (emoji) {
+      case '🕌':
+        return Icons.mosque_outlined;
+      case '⚖️':
+        return Icons.gavel_outlined;
+      case '📜':
+        return Icons.history_edu_outlined;
+      case '💎':
+        return Icons.diamond_outlined;
+      case '📖':
+        return Icons.menu_book_outlined;
+      case '☀️':
+        return Icons.wb_sunny_outlined;
+      case '⚫':
+        return Icons.event_note_outlined;
+      case '⌛':
+        return Icons.hourglass_empty_outlined;
+      case '🛡️':
+        return Icons.shield_outlined;
+      case '🕋':
+        return Icons.temple_hindu_outlined; // Closest line icon for Kaaba
+      default:
+        return null;
+    }
   }
 }

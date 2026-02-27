@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
+import 'auth_provider.dart';
 
 /// User Service provider
 final userServiceProvider = Provider<UserService>((ref) {
-  return UserService();
+  final apiClient = ref.watch(apiClientProvider);
+  return UserService(apiClient: apiClient);
 });
 
 /// User stats provider

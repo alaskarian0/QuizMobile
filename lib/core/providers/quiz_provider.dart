@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/quiz.dart';
 import '../models/question.dart';
 import '../services/quiz_service.dart';
+import 'auth_provider.dart';
 
 /// Quiz Service provider
 final quizServiceProvider = Provider<QuizService>((ref) {
-  return QuizService();
+  final apiClient = ref.watch(apiClientProvider);
+  return QuizService(apiClient: apiClient);
 });
 
 /// Daily Quiz provider

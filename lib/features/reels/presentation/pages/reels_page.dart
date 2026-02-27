@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/reel_provider.dart';
 import '../../../../core/models/reel.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_network_image.dart';
 
 /// Page for viewing user reels (stories/content)
 class ReelsPage extends ConsumerStatefulWidget {
@@ -169,35 +170,12 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
         children: [
           // Media or placeholder
           if (reel.mediaUrl != null)
-            ClipRRect(
+            AppNetworkImage(
+              url: reel.mediaUrl!,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Image.network(
-                reel.mediaUrl!,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.forestGreen,
-                          AppColors.goldenYellow,
-                        ],
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.image,
-                      size: 64,
-                      color: Colors.white54,
-                    ),
-                  );
-                },
-              ),
             )
           else
             Container(

@@ -9,9 +9,28 @@ class ApiClient {
   final http.Client _client;
 
   ApiClient({
-    this.baseUrl = 'http://localhost:3001/api',
+    this.baseUrl = 'http://192.168.0.183:3001/api',
     http.Client? client,
   }) : _client = client ?? http.Client();
+
+  /// Normalizes a URL by replacing 'localhost' with the current base URL's host.
+  /// This is necessary for mobile devices/emulators to access the host machine.
+  static String normalizeUrl(String? url, String currentBaseUrl) {
+    if (url == null || url.isEmpty) return '';
+    if (!url.contains('localhost')) return url;
+
+    try {
+      final baseUri = Uri.parse(currentBaseUrl);
+      final host = baseUri.host;
+      final port = baseUri.port;
+      
+      // Replace localhost with the host from baseUrl
+      return url.replaceAll('localhost', host).replaceAll(':3001', ':$port');
+    } catch (e) {
+      // Fallback: replace with common emulator IP if parsing fails
+      return url.replaceAll('localhost', '10.0.2.2');
+    }
+  }
 
   /// Get the stored access token
   Future<String?> getAccessToken() async {
