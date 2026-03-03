@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -45,8 +46,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(authState.user),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               _buildGreeting(authState.user),
               const SizedBox(height: 16),
               _buildProgressCard(authState.user, userStats),
@@ -134,6 +134,19 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Icon(icon, color: iconColor ?? colorScheme.onSurface, size: 20),
       ),
     );
+  }
+
+  Widget _buildGreeting(user) {
+    return Text(
+      'السلام عليكم، ${user?.name ?? 'أحمد'}! 👋',
+      style: GoogleFonts.cairo(
+        fontSize: 28,
+        fontWeight: FontWeight.w900,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+    );
+  }
+
   Widget _buildProgressCard(user, userStats) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -262,19 +275,19 @@ class _HomePageState extends ConsumerState<HomePage> {
         final category = entry.value;
         final gradient = _categoryGradients[index % _categoryGradients.length];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 12),
           child: _buildChallengeCard(
             context,
             tag: 'تحدي',
             title: category.name,
             subtitle: '${category.questionCount} سؤال • اختبر معلوماتك الآن',
             icon: category.icon != null && category.icon!.isNotEmpty
-                ? Icons.emoji_events_outlined
-                : Icons.menu_book_outlined,
+                ? Icons.stars
+                : Icons.menu_book,
             gradient: gradient,
             iconEmoji: category.icon,
-            bgImageUrl: _getCategoryBgImage(category.name),
-            onTap: () => context.go('/path'),
+            bgImageUrl: category.imageUrl ?? _getCategoryBgImage(category.name),
+            onTap: () => context.push('/categories/path/${category.id}'),
           ),
         );
       }).toList(),
@@ -417,9 +430,9 @@ class _HomePageState extends ConsumerState<HomePage> {
             tag: 'التحدي اليومي',
             title: 'اختبار أركان الإسلام',
             subtitle: 'أجب على 10 أسئلة واحصل على 50 نقطة',
-            icon: Icons.track_changes_outlined,
+            icon: Icons.track_changes,
             gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
-            bgImageUrl: 'https://images.unsplash.com/photo-1580974852861-591583008985?auto=format&fit=crop&q=80&w=1080',
+            bgImageUrl: 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=1080',
             onTap: () {
               final aqeedah = categories.firstWhere(
                 (c) => c.slug == 'aqeedah-islamiyyah' || c.name.contains('أركان'),
@@ -437,9 +450,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           tag: 'التحدي اليومي',
           title: quiz.title,
           subtitle: quiz.description ?? 'أجب على ${quiz.questions.length} أسئلة واحصل على ${quiz.xp} نقطة',
-          icon: Icons.track_changes_outlined,
+          icon: Icons.track_changes,
           gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
-          bgImageUrl: 'https://images.unsplash.com/photo-1580974852861-591583008985?auto=format&fit=crop&q=80&w=1080',
+          bgImageUrl: quiz.imageUrl ?? 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=1080',
           onTap: () => context.push('/quiz/${quiz.id}'),
         );
       },
@@ -490,7 +503,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             if (bgImageUrl != null)
               Positioned.fill(
                 child: Opacity(
-                  opacity: 0.2,
+                  opacity: 0.5,
                   child: AppNetworkImage(
                     url: bgImageUrl,
                     fit: BoxFit.cover,
@@ -498,7 +511,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -506,51 +519,58 @@ class _HomePageState extends ConsumerState<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           tag,
-                          style: const TextStyle(
+                          style: GoogleFonts.cairo(
                               color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Cairo'),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                       _buildLineIcon(iconEmoji, icon),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   Text(
                     title,
-                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+                    style: GoogleFonts.cairo(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      height: 1.1,
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14, fontFamily: 'Cairo'),
+                    style: GoogleFonts.cairo(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 11,
+                      height: 1.1,
+                    ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 48,
                     child: ElevatedButton(
                       onPressed: onTap,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: gradient[1],
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         elevation: 0,
                       ),
                       child: Text(
                         buttonText,
-                        style: const TextStyle(
-                          fontSize: 20,
+                        style: GoogleFonts.cairo(
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Cairo',
                         ),
                       ),
                     ),
@@ -580,25 +600,25 @@ class _HomePageState extends ConsumerState<HomePage> {
   IconData? _emojiToLineIcon(String emoji) {
     switch (emoji) {
       case '🕌':
-        return Icons.mosque_outlined;
+        return Icons.mosque;
       case '⚖️':
-        return Icons.gavel_outlined;
+        return Icons.gavel;
       case '📜':
-        return Icons.history_edu_outlined;
+        return Icons.history_edu;
       case '💎':
-        return Icons.diamond_outlined;
+        return Icons.diamond;
       case '📖':
-        return Icons.menu_book_outlined;
+        return Icons.menu_book;
       case '☀️':
-        return Icons.wb_sunny_outlined;
+        return Icons.wb_sunny;
       case '⚫':
-        return Icons.event_note_outlined;
+        return Icons.event_note;
       case '⌛':
-        return Icons.hourglass_empty_outlined;
+        return Icons.hourglass_full;
       case '🛡️':
-        return Icons.shield_outlined;
+        return Icons.shield;
       case '🕋':
-        return Icons.temple_hindu_outlined; // Closest line icon for Kaaba
+        return Icons.temple_hindu;
       default:
         return null;
     }

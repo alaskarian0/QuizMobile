@@ -25,6 +25,7 @@ class Quiz {
   final String id;
   final String title;
   final String? description;
+  final String? imageUrl;
   final String categoryId;
   final CategorySimple? category;
   final int timeLimit;
@@ -37,6 +38,7 @@ class Quiz {
     required this.id,
     required this.title,
     this.description,
+    this.imageUrl,
     required this.categoryId,
     this.category,
     required this.timeLimit,
@@ -51,6 +53,7 @@ class Quiz {
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
+      imageUrl: json['imageUrl'] as String?,
       categoryId: json['categoryId'] as String,
       category: json['category'] != null
           ? CategorySimple.fromJson(json['category'] as Map<String, dynamic>)
