@@ -1,15 +1,32 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/providers/providers.dart';
+import '../../../../core/models/models.dart';
 
-class LearningPathPage extends StatelessWidget {
+class LearningPathPage extends ConsumerStatefulWidget {
   const LearningPathPage({super.key});
+
+  @override
+  ConsumerState<LearningPathPage> createState() => _LearningPathPageState();
+}
+
+class _LearningPathPageState extends ConsumerState<LearningPathPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh categories to ensure we have the latest data
+    Future.microtask(() => ref.read(categoriesStateProvider.notifier).loadCategories());
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final categoriesState = ref.watch(categoriesStateProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -19,62 +36,147 @@ class LearningPathPage extends StatelessWidget {
         centerTitle: true,
         title: Text(
           'المسار التعليمي',
-          style: TextStyle(
+          style: GoogleFonts.cairo(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             color: colorScheme.onSurface,
-            fontFamily: 'Cairo',
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: colorScheme.onSurface),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.nightlight_round, color: colorScheme.onSurface),
-            onPressed: () {},
+            icon: Icon(Icons.refresh, color: colorScheme.onSurface),
+            onPressed: () => ref.read(categoriesStateProvider.notifier).loadCategories(),
           ),
         ],
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: colorScheme.onSurface.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.person_outline, color: colorScheme.onSurface),
-        ),
       ),
       body: SafeArea(
         child: Column(
           children: [
             _buildStatsBar(colorScheme),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                children: [
-                  _buildUnitHeader(
-                    context,
-                    title: 'أصول الدين الخمسة',
-                    description: 'التوحيد، العدل، النبوة، الإمامة، المعاد',
-                    icon: '⭐',
-                    color: AppColors.emeraldGreen,
-                  ),
-                  _buildPathNodes(context),
-                  const SizedBox(height: 40),
-                  _buildUnitHeader(
-                    context,
-                    title: 'الأئمة المعصومون',
-                    description: 'تعرف على الأئمة الاثني عشر',
-                    icon: '✨',
-                    color: const Color(0xFF065F46),
-                  ),
-                  _buildPathNodes(context, startIndex: 7),
-                ],
-              ),
+              child: categoriesState.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : categoriesState.error != null
+                      ? Center(child: Text('خطأ: ${categoriesState.error}'))
+                      : _buildMainPath(categoriesState.categories),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMainPath(List<Category> categories) {
+    // Only show categories marked for the home/path
+    final pathCategories = categories.where((c) => c.showOnHome).toList();
+
+    if (pathCategories.isEmpty) {
+      return Center(
+        child: Text(
+          'لا توجد مسارات تعليمية حالياً',
+          style: GoogleFonts.cairo(fontSize: 16),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      itemCount: pathCategories.length,
+      itemBuilder: (context, index) {
+        final category = pathCategories[index];
+        return Column(
+          children: [
+            _buildUnitHeader(
+              context,
+              title: category.name,
+              description: category.description ?? '',
+              icon: category.icon ?? '⭐',
+              color: _getCategoryColor(category.color),
+            ),
+            _buildCategoryStages(context, category),
+            const SizedBox(height: 40),
+          ],
+        );
+      },
+    );
+  }
+
+  Color _getCategoryColor(String? colorStr) {
+    if (colorStr == null) return AppColors.emeraldGreen;
+    try {
+      return Color(int.parse(colorStr.replaceAll('#', '0xFF')));
+    } catch (e) {
+      return AppColors.emeraldGreen;
+    }
+  }
+
+  Widget _buildCategoryStages(BuildContext context, Category category) {
+    // In a real app, we would fetch stages for each category
+    // For now, if stages are not pre-loaded, we can show a placeholder or basic levels
+    final stages = category.stages ?? [];
+    
+    if (stages.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Text(
+          'سيتم إضافة المستويات قريباً',
+          style: GoogleFonts.cairo(color: Colors.grey),
+        ),
+      );
+    }
+
+    return Column(
+      children: stages.map((stage) {
+        final levels = stage.levels ?? [];
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                stage.name,
+                style: GoogleFonts.cairo(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+            _buildPathNodes(context, levels),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildPathNodes(BuildContext context, List<Level> levels) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        children: List.generate(levels.length, (index) {
+          final level = levels[index];
+          final isEven = index % 2 == 0;
+          final xOffset = isEven ? -40.0 : 40.0;
+          
+          // Using placeholder states for demonstration
+          final state = index == 0 ? 'active' : 'locked';
+
+          return Column(
+            children: [
+              Transform.translate(
+                offset: Offset(xOffset, 0),
+                child: _buildNodeItem(
+                  context: context,
+                  title: level.name,
+                  state: state,
+                  type: 'lesson',
+                  xp: level.xpReward,
+                ),
+              ),
+              if (index < levels.length - 1)
+                _buildConnector(isEven: isEven, isLocked: index + 1 > 0),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -98,10 +200,9 @@ class LearningPathPage extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            fontFamily: 'Cairo',
           ),
         ),
         const SizedBox(width: 4),
@@ -157,65 +258,23 @@ class LearningPathPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: GoogleFonts.cairo(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
-                    fontFamily: 'Cairo',
                   ),
                 ),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: GoogleFonts.cairo(
                     fontSize: 14,
                     color: colorScheme.onSurfaceVariant,
-                    fontFamily: 'Cairo',
                   ),
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPathNodes(BuildContext context, {int startIndex = 0}) {
-    final nodes = [
-      {'title': 'التوحيد', 'type': 'lesson', 'state': 'completed', 'xp': 10},
-      {'title': 'العدل', 'type': 'lesson', 'state': 'active', 'xp': 10},
-      {'title': 'مراجعة', 'type': 'review', 'state': 'locked', 'xp': 15},
-      {'title': 'النبوة', 'type': 'lesson', 'state': 'locked', 'xp': 10},
-      {'title': 'الإمامة', 'type': 'lesson', 'state': 'locked', 'xp': 10},
-      {'title': 'المعاد', 'type': 'lesson', 'state': 'locked', 'xp': 10},
-      {'title': 'اختبار', 'type': 'quiz', 'state': 'locked', 'xp': 25},
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        children: List.generate(nodes.length, (index) {
-          final node = nodes[index];
-          final isEven = index % 2 == 0;
-          final xOffset = isEven ? -40.0 : 40.0;
-          
-          return Column(
-            children: [
-              Transform.translate(
-                offset: Offset(xOffset, 0),
-                child: _buildNodeItem(
-                  context: context,
-                  title: node['title'] as String,
-                  state: node['state'] as String,
-                  type: node['type'] as String,
-                  xp: node['xp'] as int,
-                ),
-              ),
-              if (index < nodes.length - 1)
-                _buildConnector(isEven: isEven, isLocked: nodes[index + 1]['state'] == 'locked'),
-            ],
-          );
-        }),
       ),
     );
   }
@@ -296,31 +355,20 @@ class LearningPathPage extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           title,
-          style: TextStyle(
+          style: GoogleFonts.cairo(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: isLocked ? colorScheme.onSurface.withValues(alpha: 0.3) : colorScheme.onSurface,
-            fontFamily: 'Cairo',
           ),
         ),
         Text(
           'XP $xp',
-          style: TextStyle(
+          style: GoogleFonts.cairo(
             fontSize: 12,
             fontWeight: FontWeight.bold,
             color: isLocked ? colorScheme.onSurface.withValues(alpha: 0.2) : colorScheme.onSurfaceVariant,
-            fontFamily: 'Cairo',
           ),
         ),
-        if (!isLocked)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(3, (i) => Icon(
-              Icons.star,
-              size: 14,
-              color: i < 2 ? Colors.amber : Colors.grey[400],
-            )),
-          ),
       ],
     );
   }

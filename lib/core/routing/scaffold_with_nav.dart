@@ -36,16 +36,16 @@ class ScaffoldWithNav extends StatelessWidget {
                 _buildNavItem(
                   context,
                   index: 0,
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
-                  label: 'الرئيسية',
+                  icon: Icons.map_outlined,
+                  activeIcon: Icons.map_rounded,
+                  label: 'المسار',
                 ),
                 _buildNavItem(
                   context,
                   index: 1,
-                  icon: Icons.map_outlined,
-                  activeIcon: Icons.map_rounded,
-                  label: 'المسار',
+                  icon: Icons.emoji_events_outlined,
+                  activeIcon: Icons.emoji_events_rounded,
+                  label: 'المسابقات',
                 ),
                 _buildNavItem(
                   context,

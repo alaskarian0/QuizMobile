@@ -94,19 +94,19 @@ class AnswerStats {
 }
 
 /// Question statistics for a specific question
-class QuestionStats {
+class QuestionHistoryStats {
   final String questionId;
   final int attempts;
   final double correctRate;
 
-  QuestionStats({
+  QuestionHistoryStats({
     required this.questionId,
     required this.attempts,
     required this.correctRate,
   });
 
-  factory QuestionStats.fromJson(Map<String, dynamic> json) {
-    return QuestionStats(
+  factory QuestionHistoryStats.fromJson(Map<String, dynamic> json) {
+    return QuestionHistoryStats(
       questionId: json['questionId'] as String,
       attempts: json['attempts'] as int,
       correctRate: (json['correctRate'] as num).toDouble(),

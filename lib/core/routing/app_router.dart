@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/learning_path/presentation/pages/learning_path_page.dart';
 import '../../features/library/presentation/pages/library_page.dart';
 import '../../features/quiz/presentation/pages/lesson_page.dart';
@@ -19,6 +20,7 @@ import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/library/presentation/pages/content_list_page.dart';
 import 'scaffold_with_nav.dart';
+import 'auth_notifier.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -27,9 +29,25 @@ class AppRouter {
   static final _libraryNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'library');
   static final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 
+  /// The singleton auth notifier that the router listens to.
+  static final authNotifier = AuthChangeNotifier();
+
   static final router = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/path',
     navigatorKey: _rootNavigatorKey,
+    refreshListenable: authNotifier,
+    redirect: (context, state) {
+      final isAuthenticated = authNotifier.isAuthenticated;
+      final isOnLoginPage = state.matchedLocation == '/login';
+
+      if (!isAuthenticated && !isOnLoginPage) {
+        return '/login';
+      }
+      if (isAuthenticated && isOnLoginPage) {
+        return '/path';
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/login',
@@ -40,6 +58,15 @@ class AppRouter {
           return ScaffoldWithNav(navigationShell: navigationShell);
         },
         branches: [
+          StatefulShellBranch(
+            navigatorKey: _pathNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/path',
+                builder: (context, state) => const LearningPathPage(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             navigatorKey: _homeNavigatorKey,
             routes: [
@@ -98,15 +125,6 @@ class AppRouter {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _pathNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/path',
-                builder: (context, state) => const LearningPathPage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
             navigatorKey: _libraryNavigatorKey,
             routes: [
               GoRoute(
@@ -120,6 +138,7 @@ class AppRouter {
                       return ContentListPage(
                         title: extra?['title'] ?? 'المحتوى',
                         category: extra?['category'] ?? 'articles',
+                        type: extra?['type'] as String?,
                       );
                     },
                   ),

@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:ui' as ui;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/providers.dart';
-import '../../../../core/models/category.dart';
-import '../../../../core/models/stage.dart';
+import '../../../../core/models/models.dart';
 
 class CategoryPathPage extends ConsumerWidget {
   final String categoryId;

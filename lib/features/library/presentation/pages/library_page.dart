@@ -43,20 +43,102 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   children: [
                     _buildWelcomeCard(),
                     const SizedBox(height: 32),
+                    _buildSectionHeader('المعارف الإسلامية'),
+                    const SizedBox(height: 16),
+                    _buildKnowledgeSubsections(),
+                    const SizedBox(height: 32),
                     _buildSectionHeader('أقسام المكتبة'),
                     const SizedBox(height: 16),
                     _buildLibrarySections(),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader('جميع الدورات التعليمية'),
-                    const SizedBox(height: 16),
-                    _buildCategoriesGrid(categoriesState),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 48),
                   ],
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildKnowledgeSubsections() {
+    final subsections = [
+      {
+        'title': 'أصول الدين',
+        'subtitle': 'العقيدة والتوحيد',
+        'icon': '🕌',
+        'category': 'usul-al-din',
+        'color': const Color(0xFF3B82F6),
+      },
+      {
+        'title': 'الأحكام الشرعية',
+        'subtitle': 'الفقه والعبادات',
+        'icon': '⚖️',
+        'category': 'ahkam-shariyya',
+        'color': const Color(0xFF10B981),
+      },
+      {
+        'title': 'الأخلاق الإسلامية',
+        'subtitle': 'تزكية النفس',
+        'icon': '💎',
+        'category': 'islamic-ethics',
+        'color': const Color(0xFF8B5CF6),
+      },
+    ];
+
+    return SizedBox(
+      height: 140,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: subsections.length,
+        itemBuilder: (context, index) {
+          final sub = subsections[index];
+          return Container(
+            width: 160,
+            margin: const EdgeInsets.only(left: 16),
+            child: GestureDetector(
+              onTap: () {
+                context.push('/library/content', extra: {
+                  'title': sub['title'],
+                  'category': sub['category'],
+                  'type': 'articles',
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: (sub['color'] as Color).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: (sub['color'] as Color).withValues(alpha: 0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(sub['icon'] as String, style: const TextStyle(fontSize: 28)),
+                    const SizedBox(height: 12),
+                    Text(
+                      sub['title'] as String,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                    Text(
+                      sub['subtitle'] as String,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -179,18 +261,18 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         'slug': 'lessons',
       },
       {
+        'icon': Icons.import_contacts_rounded,
+        'title': 'الكتب',
+        'subtitle': 'مطالعة قيمة',
+        'color': const Color(0xFF8B5CF6),
+        'slug': 'ebooks',
+      },
+      {
         'icon': Icons.headphones_rounded,
         'title': 'البودكاست',
         'subtitle': 'استماع ممتع',
         'color': const Color(0xFF3B82F6),
         'slug': 'podcasts',
-      },
-      {
-        'icon': Icons.import_contacts_rounded,
-        'title': 'الكتب',
-        'subtitle': 'مطالعة قيمة',
-        'color': const Color(0xFF8B5CF6),
-        'slug': 'books',
       },
     ];
 
@@ -276,113 +358,5 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       ),
     );
   }
-
-  Widget _buildCategoriesGrid(CategoriesState state) {
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (state.error != null) {
-      return Center(child: Text(state.error!));
-    }
-    if (state.categories.isEmpty) {
-      return const Center(child: Text('لا توجد دورات حالياً'));
-    }
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: state.categories.length,
-      itemBuilder: (context, index) {
-        final category = state.categories[index];
-        final gradient = _categoryGradients[index % _categoryGradients.length];
-        return _buildCategoryCard(category, gradient);
-      },
-    );
-  }
-
-  Widget _buildCategoryCard(Category category, List<Color> gradient) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: () => context.go('/path'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.05)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: gradient,
-                  ),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                ),
-                child: Center(
-                  child: category.icon != null && category.icon!.isNotEmpty
-                      ? Text(category.icon!, style: const TextStyle(fontSize: 40))
-                      : const Icon(Icons.menu_book, color: Colors.white, size: 40),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Cairo',
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.help_outline_rounded, size: 12, color: colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${category.questionCount} سؤال',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colorScheme.onSurface.withValues(alpha: 0.6),
-                          fontFamily: 'Cairo',
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
+

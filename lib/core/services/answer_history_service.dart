@@ -80,13 +80,13 @@ class AnswerHistoryService {
   }
 
   /// Get history for a specific question
-  Future<QuestionStats> getQuestionStats(String questionId) async {
+  Future<QuestionHistoryStats> getQuestionStats(String questionId) async {
     try {
       final response = await _apiClient.get('/answer-history/question/$questionId');
       final data = _apiClient.handleResponse(response);
 
       if (data is Map && data.containsKey('data')) {
-        return QuestionStats.fromJson(data['data']);
+        return QuestionHistoryStats.fromJson(data['data']);
       }
 
       throw Exception('Invalid response format');

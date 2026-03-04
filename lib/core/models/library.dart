@@ -2,7 +2,7 @@
 class Article {
   final String id;
   final String title;
-  final String? titleEn;
+  final String titleAr;
   final String? excerpt;
   final String? imageUrl;
   final String? author;
@@ -14,7 +14,7 @@ class Article {
   Article({
     required this.id,
     required this.title,
-    this.titleEn,
+    required this.titleAr,
     this.excerpt,
     this.imageUrl,
     this.author,
@@ -27,8 +27,8 @@ class Article {
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
       id: json['id'] as String,
-      title: json['title'] as String,
-      titleEn: json['titleEn'] as String?,
+      title: json['title'] as String? ?? '',
+      titleAr: json['titleAr'] as String? ?? json['title'] as String? ?? '',
       excerpt: json['excerpt'] as String?,
       imageUrl: json['imageUrl'] as String?,
       author: json['author'] as String?,
@@ -44,7 +44,7 @@ class Article {
 class Lesson {
   final String id;
   final String title;
-  final String? titleEn;
+  final String titleAr;
   final String? description;
   final String? videoUrl;
   final String? thumbnailUrl;
@@ -57,7 +57,7 @@ class Lesson {
   Lesson({
     required this.id,
     required this.title,
-    this.titleEn,
+    required this.titleAr,
     this.description,
     this.videoUrl,
     this.thumbnailUrl,
@@ -71,8 +71,8 @@ class Lesson {
   factory Lesson.fromJson(Map<String, dynamic> json) {
     return Lesson(
       id: json['id'] as String,
-      title: json['title'] as String,
-      titleEn: json['titleEn'] as String?,
+      title: json['title'] as String? ?? '',
+      titleAr: json['titleAr'] as String? ?? json['title'] as String? ?? '',
       description: json['description'] as String?,
       videoUrl: json['videoUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
@@ -101,7 +101,7 @@ class Lesson {
 class Podcast {
   final String id;
   final String title;
-  final String? titleEn;
+  final String titleAr;
   final String? description;
   final String? audioUrl;
   final String? thumbnailUrl;
@@ -114,7 +114,7 @@ class Podcast {
   Podcast({
     required this.id,
     required this.title,
-    this.titleEn,
+    required this.titleAr,
     this.description,
     this.audioUrl,
     this.thumbnailUrl,
@@ -128,8 +128,8 @@ class Podcast {
   factory Podcast.fromJson(Map<String, dynamic> json) {
     return Podcast(
       id: json['id'] as String,
-      title: json['title'] as String,
-      titleEn: json['titleEn'] as String?,
+      title: json['title'] as String? ?? '',
+      titleAr: json['titleAr'] as String? ?? json['title'] as String? ?? '',
       description: json['description'] as String?,
       audioUrl: json['audioUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
@@ -158,7 +158,7 @@ class Podcast {
 class EBook {
   final String id;
   final String title;
-  final String? titleEn;
+  final String titleAr;
   final String? description;
   final String fileUrl;
   final String? coverUrl;
@@ -171,7 +171,7 @@ class EBook {
   EBook({
     required this.id,
     required this.title,
-    this.titleEn,
+    required this.titleAr,
     this.description,
     required this.fileUrl,
     this.coverUrl,
@@ -185,8 +185,8 @@ class EBook {
   factory EBook.fromJson(Map<String, dynamic> json) {
     return EBook(
       id: json['id'] as String,
-      title: json['title'] as String,
-      titleEn: json['titleEn'] as String?,
+      title: json['title'] as String? ?? '',
+      titleAr: json['titleAr'] as String? ?? json['title'] as String? ?? '',
       description: json['description'] as String?,
       fileUrl: json['fileUrl'] as String,
       coverUrl: json['coverUrl'] as String?,

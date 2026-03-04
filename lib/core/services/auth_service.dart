@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_client.dart';
 import '../models/user.dart';
@@ -33,6 +34,20 @@ class AuthService {
       await _saveUserData(loginResponse.user);
 
       return loginResponse;
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Guest login
+  Future<String> guestLogin() async {
+    try {
+      final response = await _apiClient.post('/auth/guest');
+      final data = _apiClient.handleResponse(response);
+      final token = data['access_token'] as String;
+
+      await _apiClient.saveTokens(accessToken: token);
+      return token;
     } catch (e) {
       throw _handleError(e);
     }
@@ -135,9 +150,15 @@ class AuthService {
 
   /// Handle errors
   Exception _handleError(dynamic error) {
+    if (error is TimeoutException) {
+      return Exception('انتهت مهلة الاتصال بالخادم. تحقق من اتصالك بالإنترنت.');
+    }
     if (error is ApiException) {
       return error;
     }
-    return Exception('An unexpected error occurred: $error');
+    if (error.toString().contains('SocketException') || error.toString().contains('Connection')) {
+      return Exception('لا يمكن الاتصال بالخادم. تأكد من أن الخادم يعمل وأنك متصل بنفس الشبكة.');
+    }
+    return Exception('حدث خطأ غير متوقع: $error');
   }
 }

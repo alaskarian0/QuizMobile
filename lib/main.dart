@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routing/app_router.dart';
+import 'core/routing/auth_notifier.dart';
 import 'core/theme/theme_provider.dart';
 
-void main() {
+void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load persisted auth token so the router can apply the redirect guard
+  // before rendering the first frame.
+  await AppRouter.authNotifier.initialize();
 
   // Set error handler for Flutter errors
   FlutterError.onError = (FlutterErrorDetails details) {

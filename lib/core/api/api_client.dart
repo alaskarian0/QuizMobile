@@ -76,26 +76,13 @@ class ApiClient {
       ...?headers,
     };
 
-    final response = await _client.get(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: requestHeaders,
-    );
+    final response = await _client
+        .get(Uri.parse('$baseUrl$endpoint'), headers: requestHeaders)
+        .timeout(const Duration(seconds: 15));
 
-    // Try to refresh token on 401
     if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
-      if (refreshed) {
-        return get(endpoint, headers: headers);
-      }
-      // If refresh failed, try once more without token (for public endpoints)
-      final publicHeaders = {
-        'Content-Type': 'application/json',
-        ...?headers,
-      };
-      return _client.get(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: publicHeaders,
-      );
+      if (refreshed) return get(endpoint, headers: headers);
     }
 
     return response;
@@ -114,28 +101,17 @@ class ApiClient {
       ...?headers,
     };
 
-    final response = await _client.post(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: requestHeaders,
-      body: body != null ? jsonEncode(body) : null,
-    );
+    final response = await _client
+        .post(
+          Uri.parse('$baseUrl$endpoint'),
+          headers: requestHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        )
+        .timeout(const Duration(seconds: 15));
 
-    // Try to refresh token on 401
     if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
-      if (refreshed) {
-        return post(endpoint, headers: headers, body: body);
-      }
-      // If refresh failed, try once more without token (for public endpoints)
-      final publicHeaders = {
-        'Content-Type': 'application/json',
-        ...?headers,
-      };
-      return _client.post(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: publicHeaders,
-        body: body != null ? jsonEncode(body) : null,
-      );
+      if (refreshed) return post(endpoint, headers: headers, body: body);
     }
 
     return response;
@@ -154,28 +130,17 @@ class ApiClient {
       ...?headers,
     };
 
-    final response = await _client.patch(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: requestHeaders,
-      body: body != null ? jsonEncode(body) : null,
-    );
+    final response = await _client
+        .patch(
+          Uri.parse('$baseUrl$endpoint'),
+          headers: requestHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        )
+        .timeout(const Duration(seconds: 15));
 
-    // Try to refresh token on 401
     if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
-      if (refreshed) {
-        return patch(endpoint, headers: headers, body: body);
-      }
-      // If refresh failed, try once more without token (for public endpoints)
-      final publicHeaders = {
-        'Content-Type': 'application/json',
-        ...?headers,
-      };
-      return _client.patch(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: publicHeaders,
-        body: body != null ? jsonEncode(body) : null,
-      );
+      if (refreshed) return patch(endpoint, headers: headers, body: body);
     }
 
     return response;
@@ -193,26 +158,13 @@ class ApiClient {
       ...?headers,
     };
 
-    final response = await _client.delete(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: requestHeaders,
-    );
+    final response = await _client
+        .delete(Uri.parse('$baseUrl$endpoint'), headers: requestHeaders)
+        .timeout(const Duration(seconds: 15));
 
-    // Try to refresh token on 401
     if (response.statusCode == 401 && token != null) {
       final refreshed = await _refreshToken();
-      if (refreshed) {
-        return delete(endpoint, headers: headers);
-      }
-      // If refresh failed, try once more without token (for public endpoints)
-      final publicHeaders = {
-        'Content-Type': 'application/json',
-        ...?headers,
-      };
-      return _client.delete(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: publicHeaders,
-      );
+      if (refreshed) return delete(endpoint, headers: headers);
     }
 
     return response;
@@ -259,29 +211,41 @@ class ApiClient {
     }
   }
 
-  /// Handle API response
+  /// Handle API response — unwraps NestJS {success, data} envelope
   dynamic handleResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:
       case 201:
-        return jsonDecode(response.body);
+        final decoded = jsonDecode(response.body);
+        // Unwrap NestJS envelope: { success: true, data: {...} }
+        if (decoded is Map<String, dynamic> && decoded.containsKey('data')) {
+          return decoded['data'];
+        }
+        return decoded;
       case 204:
         return null;
       case 400:
-        throw BadRequestException(jsonDecode(response.body)['message'] ?? 'Bad request');
+        final body = _tryDecode(response.body);
+        final msg = body?['message'] ?? 'طلب غير صحيح';
+        throw BadRequestException(msg is List ? msg.join(', ') : msg.toString());
       case 401:
-        throw UnauthorizedException('Unauthorized');
+        throw UnauthorizedException('غير مصرح');
       case 403:
-        throw ForbiddenException('Forbidden');
+        throw ForbiddenException('ممنوع');
       case 404:
-        throw NotFoundException('Resource not found');
+        throw NotFoundException('المورد غير موجود');
       case 500:
-        throw ServerException('Internal server error');
+        throw ServerException('خطأ في الخادم');
       default:
-        throw ApiException(
-          'Unexpected error: ${response.statusCode}',
-          response.statusCode,
-        );
+        throw ApiException('خطأ غير متوقع: ${response.statusCode}', response.statusCode);
+    }
+  }
+
+  Map<String, dynamic>? _tryDecode(String body) {
+    try {
+      return jsonDecode(body) as Map<String, dynamic>?;
+    } catch (_) {
+      return null;
     }
   }
 }

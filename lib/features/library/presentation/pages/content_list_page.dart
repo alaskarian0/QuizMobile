@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/providers.dart';
+import '../../../../core/models/library.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class ContentListPage extends StatelessWidget {
+class ContentListPage extends ConsumerWidget {
   final String title;
   final String category;
+  final String? type;
 
   const ContentListPage({
     super.key,
     required this.title,
     required this.category,
+    this.type,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    // Dummy data based on category
-    final items = _getDummyItems();
+    final contentAsync = _getContentProvider(ref);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -37,24 +42,37 @@ class ContentListPage extends StatelessWidget {
               ),
               title: Text(
                 title,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                   fontFamily: 'Cairo',
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.all(20),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final item = items[index];
-                    return _buildContentItem(context, item, isDark, colorScheme);
-                  },
-                  childCount: items.length,
-                ),
+            contentAsync.when(
+              data: (items) => SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: items.isEmpty
+                    ? const SliverFillRemaining(
+                        child: Center(
+                          child: Text('لا يوجد محتوى حالياً', style: TextStyle(fontFamily: 'Cairo')),
+                        ),
+                      )
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final item = items[index];
+                            return _buildContentCard(context, item, isDark, colorScheme);
+                          },
+                          childCount: items.length,
+                        ),
+                      ),
+              ),
+              loading: () => const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => SliverFillRemaining(
+                child: Center(child: Text('خطأ في تحميل البيانات: $err')),
               ),
             ),
           ],
@@ -63,43 +81,66 @@ class ContentListPage extends StatelessWidget {
     );
   }
 
-  List<Map<String, String>> _getDummyItems() {
-    switch (category) {
-      case 'articles':
-        return [
-          {'title': 'فضل الصلاة ومكانتها', 'desc': 'مقال يتحدث عن أهمية الصلاة في حياة المسلم', 'date': '2024-03-20'},
-          {'title': 'بر الوالدين وأثره', 'desc': 'كيف نبر والدينا في العصر الحديث؟', 'date': '2024-03-18'},
-          {'title': 'أخلاق النبي الكريم', 'desc': 'دروس من حياة النبي في التعامل مع الآخرين', 'date': '2024-03-15'},
-        ];
-      case 'lessons':
-        return [
-          {'title': 'سلسلة تعلم القرآن', 'desc': 'درس مرئي لتعليم أحكام التجويد الأساسية', 'date': 'فيديو • 15:30'},
-          {'title': 'قصص الأنبياء - آدم', 'desc': 'قصة الخلق بأسلوب مشوق ومبسط بالصوت والصورة', 'date': 'فيديو • 22:45'},
-          {'title': 'أركان الإسلام بالتفصيل', 'desc': 'شرح مبسط للأركان الخمسة للمبتدئين', 'date': 'فيديو • 18:20'},
-        ];
-      case 'podcasts':
-        return [
-          {'title': 'حديث القلب - الحلقة 1', 'desc': 'بودكاست يسعى لراحة النفس وطمأنينة القلب', 'date': 'صوت • 45:00'},
-          {'title': 'أسئلة معاصرة', 'desc': 'إجابات على أسئلة الشباب الدينية الشائعة', 'date': 'صوت • 33:15'},
-          {'title': 'رحلة في السيرة', 'desc': 'تتبع لمسار الهجرة النبوية المباركة', 'date': 'صوت • 50:10'},
-        ];
-      case 'books':
-        return [
-          {'title': 'حصن المسلم', 'desc': 'كتاب الأذكار اليومية من الكتاب والسنة', 'size': '2.5 MB'},
-          {'title': 'الأربعون النووية', 'desc': 'شرح مبسط لأهم الأحاديث النبوية الشاملة', 'size': '4.1 MB'},
-          {'title': 'رياض الصالحين', 'desc': 'مختارات من كلام سيد المرسلين', 'size': '8.3 MB'},
-        ];
-      default:
-        return [
-          {'title': 'محتوى قادم قريباً', 'desc': 'انتظروا المزيد من المحتوى قريباً', 'date': '-'},
-        ];
+  AsyncValue<List<dynamic>> _getContentProvider(WidgetRef ref) {
+    if (type == 'articles' || category == 'articles') {
+      // If category is a slug like 'usul-al-din', fetch by that
+      if (category != 'articles') {
+           return ref.watch(articlesByCategoryProvider(category));
+      }
+      return ref.watch(articlesProvider);
+    } else if (category == 'lessons') {
+      return ref.watch(lessonsProvider);
+    } else if (category == 'ebooks') {
+      return ref.watch(ebooksProvider);
+    } else if (category == 'podcasts') {
+      return ref.watch(podcastsProvider);
     }
+    return const AsyncValue.data([]);
   }
 
-  Widget _buildContentItem(BuildContext context, Map<String, String> item, bool isDark, ColorScheme colorScheme) {
+  Widget _buildContentCard(BuildContext context, dynamic item, bool isDark, ColorScheme colorScheme) {
+    String title = '';
+    String desc = '';
+    String? imageUrl;
+    IconData defaultIcon = Icons.article_rounded;
+    VoidCallback? onTap;
+
+    if (item is Article) {
+      title = item.titleAr;
+      desc = item.excerpt ?? '';
+      imageUrl = item.imageUrl;
+      defaultIcon = Icons.article_rounded;
+      onTap = () {
+        // Show article detail or similar
+      };
+    } else if (item is Lesson) {
+      title = item.titleAr;
+      desc = item.description ?? '';
+      imageUrl = item.thumbnailUrl;
+      defaultIcon = Icons.play_circle_fill_rounded;
+      onTap = () async {
+        if (item.videoUrl != null) {
+          final url = Uri.parse(item.videoUrl!);
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          }
+        }
+      };
+    } else if (item is EBook) {
+      title = item.titleAr;
+      desc = item.description ?? '';
+      imageUrl = item.coverUrl;
+      defaultIcon = Icons.menu_book_rounded;
+      onTap = () async {
+          final url = Uri.parse(item.fileUrl);
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          }
+      };
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
@@ -112,80 +153,80 @@ class ContentListPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              _getIconForCategory(),
-              color: colorScheme.primary,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['title'] ?? '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                    fontFamily: 'Cairo',
-                  ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
+                  width: 90,
+                  height: 90,
+                  child: imageUrl != null
+                      ? AppNetworkImage(url: imageUrl, fit: BoxFit.cover)
+                      : Container(
+                          color: colorScheme.primary.withValues(alpha: 0.1),
+                          child: Icon(defaultIcon, color: colorScheme.primary, size: 32),
+                        ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  item['desc'] ?? '',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: colorScheme.onSurface.withValues(alpha: 0.5),
-                    fontFamily: 'Cairo',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.access_time_rounded, size: 14, color: colorScheme.primary.withValues(alpha: 0.5)),
-                    const SizedBox(width: 4),
                     Text(
-                      item['date'] ?? item['size'] ?? '',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurface.withValues(alpha: 0.4),
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                         fontFamily: 'Cairo',
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      desc,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                    if (item is Lesson) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                         decoration: BoxDecoration(
+                           color: Colors.red.withValues(alpha: 0.1),
+                           borderRadius: BorderRadius.circular(8),
+                         ),
+                         child: const Row(
+                           mainAxisSize: MainAxisSize.min,
+                           children: [
+                             Icon(Icons.play_arrow_rounded, size: 14, color: Colors.red),
+                             SizedBox(width: 4),
+                             Text(
+                               'درس مرئي',
+                               style: TextStyle(fontSize: 10, color: Colors.red, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+                             ),
+                           ],
+                         ),
+                      ),
+                    ],
                   ],
                 ),
-              ],
-            ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey.shade400),
+            ],
           ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.more_vert_rounded, color: colorScheme.onSurface.withValues(alpha: 0.3)),
-          ),
-        ],
+        ),
       ),
     );
   }
-
-  IconData _getIconForCategory() {
-    switch (category) {
-      case 'articles': return Icons.article_rounded;
-      case 'lessons': return Icons.play_lesson_rounded;
-      case 'podcasts': return Icons.headphones_rounded;
-      case 'books': return Icons.import_contacts_rounded;
-      default: return Icons.info_outline;
-    }
-  }
 }
+

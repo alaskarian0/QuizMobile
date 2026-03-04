@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/api_client.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../routing/auth_notifier.dart';
+import '../routing/app_router.dart';
 
 /// API Client provider
 final apiClientProvider = Provider<ApiClient>((ref) {
@@ -77,6 +79,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isAuthenticated: true,
         isLoading: false,
       );
+      // Tell the router to re-evaluate the redirect guard
+      AppRouter.authNotifier.onLogin();
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+      return false;
+    }
+  }
+
+  /// Guest Login
+  Future<bool> guestLogin() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _authService.guestLogin();
+      state = AuthState(
+        isAuthenticated: true,
+        isLoading: false,
+      );
+      // Tell the router to re-evaluate the redirect guard
+      AppRouter.authNotifier.onLogin();
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -96,6 +121,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(isLoading: false);
     }
+    // Tell the router to re-evaluate the redirect guard → sends to /login
+    AppRouter.authNotifier.onLogout();
   }
 
   /// Refresh user data

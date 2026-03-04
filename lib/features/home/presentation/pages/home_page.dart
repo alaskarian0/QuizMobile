@@ -6,9 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/providers/providers.dart';
-import '../../../../core/models/quiz.dart';
-import '../../../../core/models/user.dart' as user_models;
-import '../../../../core/models/category.dart';
+import '../../../../core/models/models.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -46,13 +44,24 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 32),
-              _buildGreeting(authState.user),
-              const SizedBox(height: 16),
-              _buildProgressCard(authState.user, userStats),
-              const SizedBox(height: 32),
-              _buildDailyChallenge(dailyQuiz, categoriesState),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+              Text(
+                'المسابقات والفعاليات',
+                style: GoogleFonts.cairo(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'شارك في المسابقات الموسمية والخاصة',
+                style: GoogleFonts.cairo(
+                  fontSize: 14,
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              const SizedBox(height: 24),
               _buildCategoriesSection(categoriesState),
               const SizedBox(height: 120),
             ],
@@ -138,7 +147,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildGreeting(user) {
     return Text(
-      'السلام عليكم، ${user?.name ?? 'أحمد'}! 👋',
+      'السلام عليكم، ${user?.name ?? 'ضيفنا العزيز'}! 👋',
       style: GoogleFonts.cairo(
         fontSize: 28,
         fontWeight: FontWeight.w900,
@@ -151,11 +160,11 @@ class _HomePageState extends ConsumerState<HomePage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final xp = user?.xp ?? 3000;
+    final xp = user?.xp ?? 0;
     final level = user?.level ?? 1;
-    final streak = user?.streak ?? 7;
-    final xpForNextLevel = 2450; // Match mockup
-    final xpProgress = 0.3; // Match mockup visual
+    final streak = user?.streak ?? 0;
+    final xpForNextLevel = user?.xpForNextLevel ?? 500;
+    final xpProgress = user?.levelProgress ?? 0.0;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -259,7 +268,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             : categoriesState.error != null
                 ? _buildCategoriesError(categoriesState.error!)
                 : _buildCategoriesList(
-                    categoriesState.categories.toList(),
+                    categoriesState.categories.where((c) => c.showAsChallenge).toList(),
                   ),
       ],
     );
@@ -503,7 +512,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             if (bgImageUrl != null)
               Positioned.fill(
                 child: Opacity(
-                  opacity: 0.5,
+                  opacity: 0.7,
                   child: AppNetworkImage(
                     url: bgImageUrl,
                     fit: BoxFit.cover,
@@ -563,14 +572,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: gradient[1],
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         elevation: 0,
+                        padding: EdgeInsets.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
                         buttonText,
                         style: GoogleFonts.cairo(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          height: 1.2,
                         ),
                       ),
                     ),

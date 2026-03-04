@@ -98,7 +98,7 @@ class AnswerHistoryNotifier extends StateNotifier<AnswerHistoryState> {
   }
 
   /// Get question stats
-  Future<QuestionStats?> getQuestionStats(String questionId) async {
+  Future<QuestionHistoryStats?> getQuestionStats(String questionId) async {
     try {
       return await _answerHistoryService.getQuestionStats(questionId);
     } catch (e) {
