@@ -107,9 +107,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: (sub['color'] as Color).withValues(alpha: 0.1),
+                  color: (sub['color'] as Color).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: (sub['color'] as Color).withValues(alpha: 0.2)),
+                  border: Border.all(color: (sub['color'] as Color).withOpacity(0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,13 +193,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           end: Alignment.bottomRight,
           colors: [
             colorScheme.primary,
-            colorScheme.primary.withValues(alpha: 0.8),
+            colorScheme.primary.withOpacity(0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.3),
+            color: colorScheme.primary.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -210,7 +210,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -316,10 +316,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.05)),
+          border: Border.all(color: colorScheme.onSurface.withOpacity(0.05)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+              color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -331,7 +331,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 28),
@@ -349,7 +349,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               subtitle,
               style: TextStyle(
                 fontSize: 12,
-                color: colorScheme.onSurface.withValues(alpha: 0.5),
+                color: colorScheme.onSurface.withOpacity(0.5),
                 fontFamily: 'Cairo',
               ),
             ),

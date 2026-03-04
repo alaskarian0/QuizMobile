@@ -64,7 +64,7 @@ class AchievementsPage extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.forestGreen.withValues(alpha: 0.1),
+                color: AppColors.forestGreen.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -96,7 +96,7 @@ class AchievementsPage extends ConsumerWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.forestGreen.withValues(alpha: 0.3),
+            color: AppColors.forestGreen.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -108,7 +108,7 @@ class AchievementsPage extends ConsumerWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -156,7 +156,7 @@ class AchievementsPage extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -213,7 +213,7 @@ class AchievementsPage extends ConsumerWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.15),
+            color: iconColor.withOpacity(0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -263,7 +263,7 @@ class AchievementsPage extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -330,7 +330,7 @@ class AchievementsPage extends ConsumerWidget {
           decoration: BoxDecoration(
             color: isCompleted == true
                 ? AppColors.forestGreen
-                : AppColors.forestGreen.withValues(alpha: 0.3),
+                : AppColors.forestGreen.withOpacity(0.3),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -356,7 +356,7 @@ class AchievementsPage extends ConsumerWidget {
                 const SizedBox(height: 4),
                 LinearProgressIndicator(
                   value: progressPercent,
-                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                  backgroundColor: Colors.grey.withOpacity(0.2),
                   valueColor: const AlwaysStoppedAnimation<Color>(
                     AppColors.forestGreen,
                   ),
@@ -461,7 +461,7 @@ class AchievementsPage extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

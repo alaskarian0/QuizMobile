@@ -77,7 +77,7 @@ class CategoriesPage extends ConsumerWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _parseColor(color).withValues(alpha: 0.3),
+                    color: _parseColor(color).withOpacity(0.3),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
@@ -104,7 +104,7 @@ class CategoriesPage extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: Colors.white.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(

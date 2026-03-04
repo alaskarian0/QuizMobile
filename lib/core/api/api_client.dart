@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,28 +9,81 @@ class ApiClient {
   final String baseUrl;
   final http.Client _client;
 
-  ApiClient({
-    this.baseUrl = 'http://192.168.0.183:3001/api',
+  factory ApiClient({
+    String? baseUrl,
     http.Client? client,
-  }) : _client = client ?? http.Client();
+  }) {
+    // If no baseUrl provided, determine the appropriate one based on platform
+    final effectiveBaseUrl = baseUrl ?? _getDefaultBaseUrl();
+    return ApiClient._(effectiveBaseUrl, client ?? http.Client());
+  }
 
-  /// Normalizes a URL by replacing 'localhost' with the current base URL's host.
-  /// This is necessary for mobile devices/emulators to access the host machine.
+  /// Private constructor
+  ApiClient._(this.baseUrl, this._client);
+
+  /// Get the default base URL based on the platform
+  static String _getDefaultBaseUrl() {
+    // For development, use emulator-accessible URLs
+    // Android emulator uses 10.0.2.2 to reach host machine
+    // iOS simulator can use localhost
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:3001/api';
+    } else if (Platform.isIOS) {
+      return 'http://localhost:3001/api';
+    }
+    // For web or other platforms, use localhost
+    return 'http://localhost:3001/api';
+  }
+
+  /// Normalizes a URL for proper image loading.
+  ///
+  /// This function handles several cases:
+  /// 1. Full URLs (http://, https://) - returned as-is
+  /// 2. Relative paths (/uploads/images/...) - prefixed with base URL
+  /// 3. localhost URLs - replaced with appropriate host for emulators
+  /// 4. 127.0.0.1 URLs - replaced with appropriate host for emulators
   static String normalizeUrl(String? url, String currentBaseUrl) {
     if (url == null || url.isEmpty) return '';
-    if (!url.contains('localhost')) return url;
 
-    try {
-      final baseUri = Uri.parse(currentBaseUrl);
-      final host = baseUri.host;
-      final port = baseUri.port;
-      
-      // Replace localhost with the host from baseUrl
-      return url.replaceAll('localhost', host).replaceAll(':3001', ':$port');
-    } catch (e) {
-      // Fallback: replace with common emulator IP if parsing fails
-      return url.replaceAll('localhost', '10.0.2.2');
+    // If it's already a full URL with http/https, return as-is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
     }
+
+    // Handle relative paths - prepend with base URL (without /api suffix)
+    if (url.startsWith('/')) {
+      try {
+        final baseUri = Uri.parse(currentBaseUrl);
+        // Remove /api from the path if present
+        final path = baseUri.path.replaceAll('/api', '');
+        return '${baseUri.scheme}://${baseUri.host}:${baseUri.port}$path$url';
+      } catch (e) {
+        // Fallback: return as-is
+        return url;
+      }
+    }
+
+    // Handle localhost or 127.0.0.1 in URLs
+    if (url.contains('localhost') || url.contains('127.0.0.1')) {
+      try {
+        final baseUri = Uri.parse(currentBaseUrl);
+        final host = baseUri.host;
+        final port = baseUri.port;
+
+        // Replace localhost/127.0.0.1 with the host from baseUrl
+        return url
+            .replaceAll('localhost', host)
+            .replaceAll('127.0.0.1', host)
+            .replaceAll(RegExp(r':\d+'), ':$port');
+      } catch (e) {
+        // Fallback: replace with common emulator IP if parsing fails
+        return url
+            .replaceAll('localhost', '10.0.2.2')
+            .replaceAll('127.0.0.1', '10.0.2.2');
+      }
+    }
+
+    return url;
   }
 
   /// Get the stored access token

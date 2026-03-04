@@ -1,76 +1,113 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/providers/providers.dart';
+import '../../../../core/models/models.dart';
 
-class QuizPage extends StatefulWidget {
-  const QuizPage({super.key});
+class QuizPage extends ConsumerStatefulWidget {
+  final String? quizId;
+  const QuizPage({super.key, this.quizId});
 
   @override
-  State<QuizPage> createState() => _QuizPageState();
+  ConsumerState<QuizPage> createState() => _QuizPageState();
 }
 
-class _QuizPageState extends State<QuizPage> {
-  int _currentQuestionIndex = 0;
-  int? _selectedAnswerIndex;
-  bool _hasAnswered = false;
+class _QuizPageState extends ConsumerState<QuizPage> {
+  int _startTime = 0;
+  String? _activeQuizId;
 
-  final List<Map<String, dynamic>> _questions = [
-    {
-      'question': 'كم عدد الأئمة المعصومين عليهم السلام؟',
-      'image': 'https://images.unsplash.com/photo-1724051526928-ae6f5d53bead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbWFtJTIwYWxpJTIwc2hyaW5lJTIwbmFqYWZ8ZW58MXx8fHwxNzY4ODIwMDg3fDA&ixlib=rb-4.1.0&q=80&w=1080',
-      'options': ['عشرة أئمة', 'أحد عشر إماماً', 'اثنا عشر إماماً معصوماً', 'ثلاثة عشر إماماً'],
-      'correctIndex': 2,
-    },
-    {
-      'question': 'من هو الإمام المدفون في مدينة مشهد؟',
-      'image': 'assets/images/background.jpg',
-      'options': ['الإمام الكاظم (ع)', 'الإمام الرضا (ع)', 'الإمام الجواد (ع)', 'الإمام الهادي (ع)'],
-      'correctIndex': 1,
-    }
-  ];
-
-  void _handleAnswer(int index) {
-    if (_hasAnswered) return;
-    setState(() {
-      _selectedAnswerIndex = index;
-      _hasAnswered = true;
+  @override
+  void initState() {
+    super.initState();
+    _startTime = DateTime.now().millisecondsSinceEpoch;
+    _activeQuizId = widget.quizId;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_activeQuizId != null) {
+        ref.read(quizSessionProvider(_activeQuizId!).notifier).startQuiz(_activeQuizId!);
+      } else {
+        // Load daily quiz
+        final dailyQuiz = await ref.read(dailyQuizProvider.future);
+        if (dailyQuiz != null && mounted) {
+          setState(() {
+            _activeQuizId = dailyQuiz.id;
+          });
+          ref.read(quizSessionProvider(_activeQuizId!).notifier).startQuiz(_activeQuizId!);
+        }
+      }
     });
   }
 
-  void _nextQuestion() {
-    if (_currentQuestionIndex < _questions.length - 1) {
-      setState(() {
-        _currentQuestionIndex++;
-        _selectedAnswerIndex = null;
-        _hasAnswered = false;
-      });
+  void _handleAnswer(int index, String quizId) {
+    ref.read(quizSessionProvider(quizId).notifier).setAnswer(index);
+  }
+
+  void _nextQuestion(String quizId, QuizSessionState sessionState) {
+    if (sessionState.currentQuestionIndex < sessionState.totalQuestions - 1) {
+      ref.read(quizSessionProvider(quizId).notifier).nextQuestion();
     } else {
-      context.pushReplacement('/results', extra: {
-        'score': _selectedAnswerIndex == _questions[_currentQuestionIndex]['correctIndex'] ? 1 : 0, 
-        'total': _questions.length
+      final timeSpent = (DateTime.now().millisecondsSinceEpoch - _startTime) ~/ 1000;
+      ref.read(quizSessionProvider(quizId).notifier).submitQuiz(timeSpent: timeSpent).then((success) {
+        if (success) {
+          final result = ref.read(quizSessionProvider(quizId)).result;
+          context.pushReplacement('/results', extra: {
+            'score': result?.score ?? 0,
+            'total': result?.total ?? sessionState.totalQuestions,
+          });
+        }
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_activeQuizId == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final sessionState = ref.watch(quizSessionProvider(_activeQuizId!));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final question = _questions[_currentQuestionIndex];
+
+    if (sessionState.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (sessionState.error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('خطأ: ${sessionState.error}'),
+              ElevatedButton(
+                onPressed: () => ref.read(quizSessionProvider(_activeQuizId!).notifier).startQuiz(_activeQuizId!),
+                child: const Text('إعادة المحاولة'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final question = sessionState.currentQuestion;
+    if (question == null) {
+      return const Scaffold(body: Center(child: Text('لا يوجد أسئلة')));
+    }
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(context),
+            _buildHeader(context, sessionState),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    _buildQuizCard(question),
+                    _buildQuizCard(_activeQuizId!, sessionState, question),
                     const SizedBox(height: 16),
                     _buildActionButtons(),
                     const SizedBox(height: 24),
@@ -86,7 +123,7 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, QuizSessionState state) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Padding(
@@ -97,14 +134,14 @@ class _QuizPageState extends State<QuizPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
+              color: colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
+              border: Border.all(color: colorScheme.primary.withOpacity(0.2)),
             ),
             child: Row(
               children: [
                 Text(
-                  'تحدي اليوم',
+                  state.session?.quizId != null ? 'تحدي' : 'اختبار',
                   style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'Cairo'),
                 ),
                 const SizedBox(width: 8),
@@ -119,8 +156,6 @@ class _QuizPageState extends State<QuizPage> {
           ),
           Row(
             children: [
-              _buildCircleIcon(context, Icons.bookmark_border_rounded, colorScheme.onSurface),
-              const SizedBox(width: 10),
               _buildCircleIcon(context, Icons.close_rounded, colorScheme.onSurface, onTap: () => context.pop()),
             ],
           ),
@@ -141,7 +176,7 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  Widget _buildQuizCard(Map<String, dynamic> question) {
+  Widget _buildQuizCard(String quizId, QuizSessionState sessionState, Question question) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Container(
@@ -149,10 +184,10 @@ class _QuizPageState extends State<QuizPage> {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.05),
+            color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? 0.3 : 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -168,7 +203,7 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 const Icon(Icons.history_toggle_off, color: Colors.grey, size: 20),
                 Text(
-                  'السؤال ${_currentQuestionIndex + 1} من ${_questions.length}',
+                  'السؤال ${sessionState.currentQuestionIndex + 1} من ${sessionState.totalQuestions}',
                   style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
                 ),
               ],
@@ -179,7 +214,7 @@ class _QuizPageState extends State<QuizPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
-              question['question'],
+              question.text,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
@@ -191,20 +226,21 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
           const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: AppNetworkImage(
-              url: question['image'],
-              height: 180,
-              width: double.infinity,
-              borderRadius: BorderRadius.circular(24),
-              shimmerBaseColor: const Color(0xFFE8F4EC),
-              shimmerHighlightColor: const Color(0xFFF5FBF7),
+          if (question.imageUrl != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: AppNetworkImage(
+                url: question.imageUrl!,
+                height: 180,
+                width: double.infinity,
+                borderRadius: BorderRadius.circular(24),
+                shimmerBaseColor: const Color(0xFFE8F4EC),
+                shimmerHighlightColor: const Color(0xFFF5FBF7),
+              ),
             ),
-          ),
           const SizedBox(height: 24),
-          ...List.generate(question['options'].length, (index) {
-            return _buildOption(index, question['options'][index], question['correctIndex']);
+          ...List.generate(question.options.length, (index) {
+            return _buildOption(quizId, sessionState, index, question.options[index]);
           }),
           const SizedBox(height: 24),
           Padding(
@@ -213,7 +249,9 @@ class _QuizPageState extends State<QuizPage> {
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: _hasAnswered ? _nextQuestion : null,
+                onPressed: sessionState.userAnswers[sessionState.currentQuestionIndex] != null 
+                    ? () => _nextQuestion(quizId, sessionState) 
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFBCA371),
                   foregroundColor: Colors.white,
@@ -224,7 +262,7 @@ class _QuizPageState extends State<QuizPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(_currentQuestionIndex < _questions.length - 1 ? 'السؤال التالي' : 'عرض النتائج', 
+                    Text(sessionState.currentQuestionIndex < sessionState.totalQuestions - 1 ? 'السؤال التالي' : 'عرض النتائج', 
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
                     const SizedBox(width: 10),
                     const Icon(Icons.arrow_forward_ios, size: 16),
@@ -239,32 +277,25 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  Widget _buildOption(int index, String text, int correctIndex) {
+  Widget _buildOption(String quizId, QuizSessionState state, int index, String text) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isSelected = _selectedAnswerIndex == index;
-    final isCorrect = index == correctIndex;
+    final isSelected = state.userAnswers[state.currentQuestionIndex] == index;
     
     Color bgColor = colorScheme.surface;
     Color textColor = colorScheme.onSurface;
-    Border? border = Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1));
+    Border? border = Border.all(color: colorScheme.onSurface.withOpacity(0.1));
 
-    if (_hasAnswered) {
-      if (isCorrect) {
-        bgColor = const Color(0xFF1B4332);
-        textColor = Colors.white;
-        border = null;
-      } else if (isSelected) {
-        bgColor = const Color(0xFFD32D2D);
-        textColor = Colors.white;
-        border = null;
-      }
+    if (isSelected) {
+      bgColor = colorScheme.primary;
+      textColor = Colors.white;
+      border = null;
     }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: InkWell(
-        onTap: () => _handleAnswer(index),
+        onTap: () => _handleAnswer(index, quizId),
         borderRadius: BorderRadius.circular(16),
         child: Container(
           width: double.infinity,

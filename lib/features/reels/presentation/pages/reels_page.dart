@@ -124,7 +124,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
           Icon(
             Icons.video_library_outlined,
             size: 64,
-            color: AppColors.forestGreen.withValues(alpha: 0.5),
+            color: AppColors.forestGreen.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -159,7 +159,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

@@ -144,10 +144,10 @@ class ContentListPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.05)),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -168,7 +168,7 @@ class ContentListPage extends ConsumerWidget {
                   child: imageUrl != null
                       ? AppNetworkImage(url: imageUrl, fit: BoxFit.cover)
                       : Container(
-                          color: colorScheme.primary.withValues(alpha: 0.1),
+                          color: colorScheme.primary.withOpacity(0.1),
                           child: Icon(defaultIcon, color: colorScheme.primary, size: 32),
                         ),
                 ),
@@ -193,7 +193,7 @@ class ContentListPage extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12,
-                        color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: colorScheme.onSurface.withOpacity(0.6),
                         fontFamily: 'Cairo',
                       ),
                     ),
@@ -202,7 +202,7 @@ class ContentListPage extends ConsumerWidget {
                       Container(
                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                          decoration: BoxDecoration(
-                           color: Colors.red.withValues(alpha: 0.1),
+                           color: Colors.red.withOpacity(0.1),
                            borderRadius: BorderRadius.circular(8),
                          ),
                          child: const Row(

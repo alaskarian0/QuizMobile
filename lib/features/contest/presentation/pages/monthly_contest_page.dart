@@ -153,7 +153,7 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.sapphireBlue.withValues(alpha: 0.3),
+                    color: AppColors.sapphireBlue.withOpacity(0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -272,7 +272,7 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.1)),
       ),
       child: Column(
         children: [
@@ -321,7 +321,7 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
             children: [
               LinearProgressIndicator(
                 value: _answeredIndices.length / _questions.length,
-                backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
+                backgroundColor: colorScheme.onSurface.withOpacity(0.1),
                 valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
                 minHeight: 8,
               ),
@@ -349,7 +349,7 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
               decoration: BoxDecoration(
                 color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
+                border: Border.all(color: colorScheme.onSurface.withOpacity(0.1)),
               ),
               child: Text(
                 question['question'],
@@ -405,16 +405,16 @@ class _MonthlyContestPageState extends State<MonthlyContestPage> {
     final bool isCorrect = index == question['correctIndex'];
     final bool isSelected = _selectedAnswerIndex == index;
 
-    Color borderColor = colorScheme.onSurface.withValues(alpha: 0.1);
+    Color borderColor = colorScheme.onSurface.withOpacity(0.1);
     Color bgColor = colorScheme.surface;
 
     if (isAnswered) {
       if (isCorrect) {
         borderColor = AppColors.emeraldGreen;
-        bgColor = AppColors.emeraldGreen.withValues(alpha: 0.1);
+        bgColor = AppColors.emeraldGreen.withOpacity(0.1);
       } else if (isSelected) {
         borderColor = AppColors.errorRed;
-        bgColor = AppColors.errorRed.withValues(alpha: 0.1);
+        bgColor = AppColors.errorRed.withOpacity(0.1);
       }
     }
 

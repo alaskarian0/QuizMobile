@@ -1,5 +1,4 @@
 import 'question.dart';
-import 'category.dart';
 
 /// Model for tracking user's answer history
 class AnswerHistory {

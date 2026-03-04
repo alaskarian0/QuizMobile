@@ -91,7 +91,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                            color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -129,7 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     borderRadius: BorderRadius.circular(36),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1B5E20).withValues(alpha: 0.35),
+                        color: const Color(0xFF1B5E20).withOpacity(0.35),
                         blurRadius: 24,
                         offset: const Offset(0, 12),
                       ),
@@ -182,7 +182,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+                      color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -267,7 +267,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF1B4332),
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: const Color(0xFF1B4332).withValues(alpha: 0.6),
+                            disabledBackgroundColor: const Color(0xFF1B4332).withOpacity(0.6),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             elevation: 0,
                           ),
@@ -300,12 +300,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               // ─── Divider ─────────────────────────────────────────────────
               Row(
                 children: [
-                  Expanded(child: Divider(color: subtitleColor.withValues(alpha: 0.3))),
+                  Expanded(child: Divider(color: subtitleColor.withOpacity(0.3))),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text('أو', style: TextStyle(color: subtitleColor, fontSize: 14, fontFamily: 'Cairo')),
                   ),
-                  Expanded(child: Divider(color: subtitleColor.withValues(alpha: 0.3))),
+                  Expanded(child: Divider(color: subtitleColor.withOpacity(0.3))),
                 ],
               ),
 
@@ -360,7 +360,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                      color: isDark ? Colors.white30 : const Color(0xFF1B4332).withValues(alpha: 0.5),
+                      color: isDark ? Colors.white30 : const Color(0xFF1B4332).withOpacity(0.5),
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -401,7 +401,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

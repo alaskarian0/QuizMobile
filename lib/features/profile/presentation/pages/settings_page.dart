@@ -148,7 +148,7 @@ class SettingsPage extends ConsumerWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.05),
+            color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -165,7 +165,7 @@ class SettingsPage extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.15),
+                    color: iconColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: iconColor, size: 22),
@@ -183,7 +183,7 @@ class SettingsPage extends ConsumerWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: colorScheme.onSurface.withValues(alpha: 0.1)),
+          Divider(height: 1, color: colorScheme.onSurface.withOpacity(0.1)),
           ...children,
         ],
       ),
@@ -207,8 +207,8 @@ class SettingsPage extends ConsumerWidget {
             height: 40,
             decoration: BoxDecoration(
               color: isDarkMode
-                  ? const Color(0xFF1B5E20).withValues(alpha: 0.15)
-                  : const Color(0xFFFFB74D).withValues(alpha: 0.15),
+                  ? const Color(0xFF1B5E20).withOpacity(0.15)
+                  : const Color(0xFFFFB74D).withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -236,7 +236,7 @@ class SettingsPage extends ConsumerWidget {
                   'تفعيل المظهر الداكن للتطبيق',
                   style: TextStyle(
                     fontSize: 13,
-                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colorScheme.onSurface.withOpacity(0.6),
                     fontFamily: 'Cairo',
                   ),
                 ),
@@ -255,9 +255,9 @@ class SettingsPage extends ConsumerWidget {
                   ref.read(themeProvider.notifier).toggleTheme();
                 },
                 activeColor: const Color(0xFF1B5E20),
-                activeTrackColor: const Color(0xFF1B5E20).withValues(alpha: 0.5),
+                activeTrackColor: const Color(0xFF1B5E20).withOpacity(0.5),
                 inactiveThumbColor: const Color(0xFFF57C00),
-                inactiveTrackColor: const Color(0xFFFFB74D).withValues(alpha: 0.5),
+                inactiveTrackColor: const Color(0xFFFFB74D).withOpacity(0.5),
               ),
             ),
           ),
@@ -285,7 +285,7 @@ class SettingsPage extends ConsumerWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.forestGreen.withValues(alpha: 0.1),
+                color: AppColors.forestGreen.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: AppColors.forestGreen, size: 22),
@@ -304,7 +304,7 @@ class SettingsPage extends ConsumerWidget {
             ),
             Icon(
               Icons.arrow_back_ios,
-              color: colorScheme.onSurface.withValues(alpha: 0.4),
+              color: colorScheme.onSurface.withOpacity(0.4),
               size: 18,
             ),
           ],
@@ -332,7 +332,7 @@ class SettingsPage extends ConsumerWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.forestGreen.withValues(alpha: 0.1),
+              color: AppColors.forestGreen.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: AppColors.forestGreen, size: 22),
@@ -356,7 +356,7 @@ class SettingsPage extends ConsumerWidget {
                   subtitle,
                   style: TextStyle(
                     fontSize: 13,
-                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colorScheme.onSurface.withOpacity(0.6),
                     fontFamily: 'Cairo',
                   ),
                 ),
@@ -369,7 +369,7 @@ class SettingsPage extends ConsumerWidget {
               value: value,
               onChanged: onChanged,
               activeColor: AppColors.forestGreen,
-              activeTrackColor: AppColors.forestGreen.withValues(alpha: 0.5),
+              activeTrackColor: AppColors.forestGreen.withOpacity(0.5),
             ),
           ),
         ],
@@ -386,7 +386,7 @@ class SettingsPage extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFF5252).withValues(alpha: 0.3),
+            color: const Color(0xFFFF5252).withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

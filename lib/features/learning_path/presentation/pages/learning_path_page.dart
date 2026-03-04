@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/providers.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/widgets/app_network_image.dart';
 
 class LearningPathPage extends ConsumerStatefulWidget {
   const LearningPathPage({super.key});
@@ -27,6 +28,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final categoriesState = ref.watch(categoriesStateProvider);
+    final userStats = ref.watch(userStatsProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -52,7 +54,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildStatsBar(colorScheme),
+            _buildTopBar(userStats.asData?.value),
             Expanded(
               child: categoriesState.isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -91,6 +93,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
               title: category.name,
               description: category.description ?? '',
               icon: category.icon ?? '⭐',
+              imageUrl: category.imageUrl,
               color: _getCategoryColor(category.color),
             ),
             _buildCategoryStages(context, category),
@@ -166,9 +169,10 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
                 offset: Offset(xOffset, 0),
                 child: _buildNodeItem(
                   context: context,
+                  id: level.id,
                   title: level.name,
                   state: state,
-                  type: 'lesson',
+                  type: 'quiz', // Levels in the path are usually quizzes
                   xp: level.xpReward,
                 ),
               ),
@@ -181,15 +185,18 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     );
   }
 
-  Widget _buildStatsBar(ColorScheme colorScheme) {
+  Widget _buildTopBar(UserStats? stats) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          _buildStatItem('XP 45', Icons.star, Colors.amber),
+          _buildStatItem('XP ${stats?.totalXP ?? 0}', Icons.star, Colors.amber),
           const SizedBox(width: 16),
-          _buildStatItem('7', Icons.local_fire_department, Colors.orange),
+          _buildStatItem('${stats?.streak ?? 0}', Icons.local_fire_department, Colors.orange),
         ],
       ),
     );
@@ -216,6 +223,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     required String title,
     required String description,
     required String icon,
+    String? imageUrl,
     required Color color,
   }) {
     final theme = Theme.of(context);
@@ -226,10 +234,10 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.1)),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.05),
+            color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -241,14 +249,20 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
-              child: Text(
-                icon,
-                style: const TextStyle(fontSize: 30),
-              ),
+              child: imageUrl != null
+                  ? AppNetworkImage(
+                      url: imageUrl,
+                      borderRadius: BorderRadius.circular(16),
+                      fit: BoxFit.cover,
+                    )
+                  : Text(
+                      icon,
+                      style: const TextStyle(fontSize: 30),
+                    ),
             ),
           ),
           const SizedBox(width: 16),
@@ -281,6 +295,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
 
   Widget _buildNodeItem({
     required BuildContext context,
+    required String id,
     required String title,
     required String state,
     required String type,
@@ -292,7 +307,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     final bool isActive = state == 'active';
     final bool isCompleted = state == 'completed';
 
-    Color nodeColor = isLocked ? colorScheme.onSurface.withValues(alpha: 0.1) : colorScheme.primary;
+    Color nodeColor = isLocked ? colorScheme.onSurface.withOpacity(0.1) : colorScheme.primary;
     if (isCompleted) nodeColor = AppColors.emeraldGreen;
     if (isActive) nodeColor = AppColors.emeraldGreen;
 
@@ -314,9 +329,9 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
           onTap: () {
             if (!isLocked) {
               if (type == 'quiz') {
-                context.push('/quiz');
+                context.push('/quiz', extra: {'quizId': id});
               } else {
-                context.push('/lesson', extra: {'lessonId': 1});
+                context.push('/lesson', extra: {'lessonId': id});
               }
             }
           },
@@ -334,7 +349,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
                   boxShadow: [
                     if (!isLocked)
                       BoxShadow(
-                        color: nodeColor.withValues(alpha: 0.3),
+                        color: nodeColor.withOpacity(0.3),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),
@@ -358,7 +373,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
           style: GoogleFonts.cairo(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isLocked ? colorScheme.onSurface.withValues(alpha: 0.3) : colorScheme.onSurface,
+            color: isLocked ? colorScheme.onSurface.withOpacity(0.3) : colorScheme.onSurface,
           ),
         ),
         Text(
@@ -366,7 +381,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
           style: GoogleFonts.cairo(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: isLocked ? colorScheme.onSurface.withValues(alpha: 0.2) : colorScheme.onSurfaceVariant,
+            color: isLocked ? colorScheme.onSurface.withOpacity(0.2) : colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -477,7 +492,7 @@ class _PulseRingState extends State<_PulseRing> with SingleTickerProviderStateMi
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppColors.forestGreen.withValues(alpha: 1 - _controller.value),
+              color: AppColors.forestGreen.withOpacity(1 - _controller.value),
               width: 2,
             ),
           ),

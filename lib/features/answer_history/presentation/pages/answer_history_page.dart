@@ -97,7 +97,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Colors.white.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -132,7 +132,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: Colors.white.withOpacity(0.8),
             fontSize: 12,
             fontFamily: 'Cairo',
           ),
@@ -149,7 +149,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
           ),
         ],
@@ -219,7 +219,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
           ),
         ],
@@ -257,7 +257,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
-              backgroundColor: color.withValues(alpha: 0.1),
+              backgroundColor: color.withOpacity(0.1),
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 8,
             ),
@@ -275,7 +275,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
           ),
         ],
@@ -371,7 +371,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
           ),
         ],
@@ -382,7 +382,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: item.isCorrect ? AppColors.successGreen.withValues(alpha: 0.1) : AppColors.errorRed.withValues(alpha: 0.1),
+              color: item.isCorrect ? AppColors.successGreen.withOpacity(0.1) : AppColors.errorRed.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -423,7 +423,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.goldenYellow.withValues(alpha: 0.2),
+                color: AppColors.goldenYellow.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -486,10 +486,10 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.errorRed.withValues(alpha: 0.05),
+        color: AppColors.errorRed.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.errorRed.withValues(alpha: 0.2),
+          color: AppColors.errorRed.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -539,7 +539,7 @@ class _AnswerHistoryPageState extends ConsumerState<AnswerHistoryPage>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.successGreen.withValues(alpha: 0.1),
+                color: AppColors.successGreen.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

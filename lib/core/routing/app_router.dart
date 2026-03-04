@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/learning_path/presentation/pages/learning_path_page.dart';
 import '../../features/library/presentation/pages/library_page.dart';
 import '../../features/quiz/presentation/pages/lesson_page.dart';
@@ -10,12 +9,10 @@ import '../../features/leaderboard/presentation/pages/leaderboard_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/contest/presentation/pages/monthly_contest_page.dart';
 import '../../features/categories/presentation/pages/categories_page.dart';
 import '../../features/categories/presentation/pages/category_path_page.dart';
 import '../../features/reels/presentation/pages/reels_page.dart';
 import '../../features/answer_history/presentation/pages/answer_history_page.dart';
-import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/library/presentation/pages/content_list_page.dart';
@@ -108,7 +105,11 @@ class AppRouter {
                   ),
                   GoRoute(
                     path: 'quiz',
-                    builder: (context, state) => const QuizPage(),
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>?;
+                      final quizId = extra?['quizId'] as String?;
+                      return QuizPage(quizId: quizId);
+                    },
                   ),
                   GoRoute(
                     path: 'results',

@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/api_client.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
-import '../routing/auth_notifier.dart';
 import '../routing/app_router.dart';
 
 /// API Client provider
+/// Uses platform-appropriate default URL for development
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient();
 });
