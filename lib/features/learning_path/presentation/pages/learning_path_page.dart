@@ -30,36 +30,25 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     final userStats = ref.watch(userStatsProvider);
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'المسار التعليمي',
-          style: GoogleFonts.cairo(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: colorScheme.onSurface),
-            onPressed: () => ref.read(categoriesStateProvider.notifier).loadCategories(),
-          ),
-        ],
-      ),
+      backgroundColor: const Color(0xFFFDFBF7), // Premium cream background
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _buildTopBar(userStats.asData?.value),
-            Expanded(
+            // Main Path Content
+            Positioned.fill(
               child: categoriesState.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : categoriesState.error != null
                       ? Center(child: Text('خطأ: ${categoriesState.error}'))
                       : _buildMainPath(categoriesState.categories),
+            ),
+            
+            // Floating Top Bar
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildTopBar(userStats.asData?.value),
             ),
           ],
         ),
@@ -86,48 +75,49 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     }
 
     // We reverse the list for the "bottom-up" view
-    // Level 1 will be at index 0 (bottom of the scroll)
     final reversedLevels = allLevels.toList();
 
-    return SingleChildScrollView(
-      controller: ScrollController(initialScrollOffset: 0),
+    return ListView.builder(
+      itemCount: reversedLevels.length,
+      padding: const EdgeInsets.only(top: 100, bottom: 80, left: 30, right: 30),
       reverse: true,
-      padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 60), // Increased horizontal padding
-      child: Column(
-        children: List.generate(reversedLevels.length, (index) {
-          final levelIndex = reversedLevels.length - 1 - index;
-          final level = reversedLevels[levelIndex];
-          final globalLevelNumber = levelIndex + 1;
-          
-          // Zig-zag pattern
-          final isLeft = globalLevelNumber % 2 != 0;
-          
-          // Logic for unlocking (dummy for now)
-          final isUnlocked = levelIndex <= 1;
-          final isActive = levelIndex == 1;
-          final isCompleted = levelIndex < 1;
-          final state = isCompleted ? 'completed' : (isActive ? 'active' : (isUnlocked ? 'active' : 'locked'));
+      physics: const BouncingScrollPhysics(),
+      itemBuilder: (context, index) {
+        final levelIndex = index;
+        final level = reversedLevels[levelIndex];
+        final globalLevelNumber = levelIndex + 1;
+        
+        final isLeft = globalLevelNumber % 2 != 0;
+        
+        final isUnlocked = levelIndex <= 1;
+        final isActive = levelIndex == 1;
+        final isCompleted = levelIndex < 1;
+        final state = isCompleted ? 'completed' : (isActive ? 'active' : (isUnlocked ? 'active' : 'locked'));
 
-          return Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              if (index > 0)
-                Positioned(
-                  bottom: 120, // Adjusted vertical spacing
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width - 120, // Respect new padding
-                    height: 120,
-                    child: CustomPaint(
-                      painter: PathPainter(
-                        isFromLeft: (globalLevelNumber - 1) % 2 != 0,
-                        isLocked: !isUnlocked,
-                      ),
+        return Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            // Connector: Draws from the PREVIOUS level (below) to THIS level
+            if (index > 0)
+              Positioned(
+                bottom:-20,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width - 40,
+                  height: 120,
+                  child: CustomPaint(
+                    painter: PathPainter(
+                      isFromLeft: !isLeft,
+                      isLocked: !isUnlocked,
                     ),
                   ),
                 ),
-                
-              _buildNodeItem(
+              ),
+              
+            // The Level Ball: Always on top
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: _buildNodeItem(
                 context: context,
                 id: level.id,
                 title: 'المستوى $globalLevelNumber',
@@ -136,31 +126,25 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
                 xp: level.xpReward,
                 alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
               ),
-              
-              const SizedBox(height: 150), // Standardized spacing
-            ],
-          );
-        }),
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildTopBar(UserStats? stats) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surface.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.onSurface.withOpacity(0.05)),
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF1B4332).withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -172,8 +156,8 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
             'المسار التعليمي',
             style: GoogleFonts.cairo(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF1B4332),
             ),
           ),
           _buildStatItem('${stats?.totalXP ?? 0}', Icons.stars, Colors.amber),
@@ -305,60 +289,77 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
           GestureDetector(
             onTap: () {
               if (!isLocked) {
-                if (type == 'quiz') {
-                  context.push('/quiz', extra: {'quizId': id});
-                } else {
-                  context.push('/lesson', extra: {'lessonId': id});
-                }
+                context.push('/quiz', extra: {'quizId': id});
               }
             },
             child: Stack(
               alignment: Alignment.center,
               children: [
-                if (isActive)
-                  const _PulseRing(),
+                if (isActive) 
+                  const SizedBox(
+                    width: 65,
+                    height: 65,
+                    child: Center(child: _PulseRing()), // Force center without affecting stack size
+                  ),
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: 65, 
+                  height: 65,
                   decoration: BoxDecoration(
                     color: nodeColor,
                     shape: BoxShape.circle,
+                    gradient: !isLocked ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isCompleted 
+                        ? [const Color(0xFF10B981), const Color(0xFF059669)]
+                        : [const Color(0xFF1B4332), const Color(0xFF2D6A4F)],
+                    ) : null,
                     boxShadow: [
-                      if (!isLocked)
-                        BoxShadow(
-                          color: nodeColor.withOpacity(0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
-                        ),
+                      BoxShadow(
+                        color: nodeColor.withOpacity(isLocked ? 0 : 0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
                     ],
                     border: isActive
-                        ? Border.all(color: AppColors.goldenYellow, width: 4)
-                        : null,
+                        ? Border.all(color: const Color(0xFFBCA371), width: 4)
+                        : (isCompleted ? null : Border.all(color: Colors.white, width: 3)),
                   ),
                   child: Icon(
-                    isLocked ? Icons.lock : (isCompleted ? Icons.check : icon),
-                    color: Colors.white,
-                    size: 30,
+                    isLocked ? Icons.lock_outline : (isCompleted ? Icons.check : icon),
+                    color: isLocked ? Colors.grey[400] : Colors.white,
+                    size: 28,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            title,
-            style: GoogleFonts.cairo(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: isLocked ? colorScheme.onSurface.withOpacity(0.3) : colorScheme.onSurface,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: isLocked ? Colors.transparent : Colors.black.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(10),
             ),
-          ),
-          Text(
-            'XP $xp',
-            style: GoogleFonts.cairo(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: isLocked ? colorScheme.onSurface.withOpacity(0.2) : colorScheme.onSurfaceVariant,
+            child: Column(
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.cairo(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: isLocked ? Colors.grey[400] : const Color(0xFF1B4332),
+                  ),
+                ),
+                Text(
+                  'XP $xp',
+                  style: GoogleFonts.cairo(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: isLocked ? Colors.grey[300] : const Color(0xFFBCA371),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -380,32 +381,22 @@ class PathPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = isLocked ? Colors.grey[300]! : AppColors.forestGreen
+      ..color = isLocked ? Colors.grey[200]! : const Color(0xFFBCA371).withOpacity(0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 6
       ..strokeCap = StrokeCap.round;
 
     final path = Path();
     
-    // Width is constrained to node center-to-center
-    // Start at bottom center of the current alignment, end at top center of target
-    if (isFromLeft) {
-      // From Left node (bottom) to Right node (top)
-      path.moveTo(0, size.height);
-      path.cubicTo(
-        0, size.height * 0.5,
-        size.width, size.height * 0.5,
-        size.width, 0,
-      );
-    } else {
-      // From Right node (bottom) to Left node (top)
-      path.moveTo(size.width, size.height);
-      path.cubicTo(
-        size.width, size.height * 0.5,
-        0, size.height * 0.5,
-        0, 0,
-      );
-    }
+    final startX = isFromLeft ? size.width * 0.15 : size.width * 0.85;
+    final endX = isFromLeft ? size.width * 0.85 : size.width * 0.15;
+    
+    path.moveTo(startX, size.height);
+    path.cubicTo(
+      startX, size.height * 0.3,
+      endX, size.height * 0.7,
+      endX, 0,
+    );
 
     if (isLocked) {
       final dashPath = Path();
