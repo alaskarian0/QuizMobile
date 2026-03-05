@@ -166,7 +166,12 @@ class ContentListPage extends ConsumerWidget {
                   width: 90,
                   height: 90,
                   child: imageUrl != null
-                      ? AppNetworkImage(url: imageUrl, fit: BoxFit.cover)
+                      ? AppNetworkImage(
+                          url: imageUrl,
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
+                        )
                       : Container(
                           color: colorScheme.primary.withOpacity(0.1),
                           child: Icon(defaultIcon, color: colorScheme.primary, size: 32),

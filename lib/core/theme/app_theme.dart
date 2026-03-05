@@ -22,15 +22,16 @@ class AppTheme {
         onError: Colors.white,
       ),
       scaffoldBackgroundColor: AppColors.backgroundBeige,
-      textTheme: GoogleFonts.tajawalTextTheme().copyWith(
-        displayLarge: GoogleFonts.tajawal(
+      textTheme: GoogleFonts.cairoTextTheme().copyWith(
+        displayLarge: GoogleFonts.cairo(
           fontWeight: FontWeight.bold,
           color: AppColors.textDark,
         ),
-        bodyLarge: GoogleFonts.tajawal(
+        bodyLarge: GoogleFonts.cairo(
           color: AppColors.textDark,
         ),
       ),
+      fontFamily: 'Cairo',
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.textDark,
@@ -74,18 +75,19 @@ class AppTheme {
         onError: Colors.white,
       ),
       scaffoldBackgroundColor: const Color(0xFF0A1F1D),
-      textTheme: GoogleFonts.tajawalTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.tajawal(
+      textTheme: GoogleFonts.cairoTextTheme(ThemeData.dark().textTheme).copyWith(
+        displayLarge: GoogleFonts.cairo(
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
-        bodyLarge: GoogleFonts.tajawal(
+        bodyLarge: GoogleFonts.cairo(
           color: Colors.white,
         ),
-        bodyMedium: GoogleFonts.tajawal(
+        bodyMedium: GoogleFonts.cairo(
           color: Colors.white70,
         ),
       ),
+      fontFamily: 'Cairo',
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,

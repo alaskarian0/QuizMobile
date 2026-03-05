@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,15 +24,22 @@ class ApiClient {
 
   /// Get the default base URL based on the platform
   static String _getDefaultBaseUrl() {
+    // Check if running on web
+    if (kIsWeb) {
+      return 'http://localhost:3001/api';
+    }
+
     // For development, use emulator-accessible URLs
     // Android emulator uses 10.0.2.2 to reach host machine
     // iOS simulator can use localhost
     if (Platform.isAndroid) {
+      // If using physical device, change this to your machine's local IP (e.g. 192.168.0.183)
       return 'http://10.0.2.2:3001/api';
     } else if (Platform.isIOS) {
       return 'http://localhost:3001/api';
     }
-    // For web or other platforms, use localhost
+
+    // For other platforms, use localhost
     return 'http://localhost:3001/api';
   }
 

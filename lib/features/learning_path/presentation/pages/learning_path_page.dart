@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/providers.dart';
 import '../../../../core/models/models.dart';
-import '../../../../core/widgets/app_network_image.dart';
 
 class LearningPathPage extends ConsumerStatefulWidget {
   const LearningPathPage({super.key});
@@ -93,7 +92,6 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
               title: category.name,
               description: category.description ?? '',
               icon: category.icon ?? '⭐',
-              imageUrl: category.imageUrl,
               color: _getCategoryColor(category.color),
             ),
             _buildCategoryStages(context, category),
@@ -223,7 +221,6 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     required String title,
     required String description,
     required String icon,
-    String? imageUrl,
     required Color color,
   }) {
     final theme = Theme.of(context);
@@ -253,16 +250,10 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
-              child: imageUrl != null
-                  ? AppNetworkImage(
-                      url: imageUrl,
-                      borderRadius: BorderRadius.circular(16),
-                      fit: BoxFit.cover,
-                    )
-                  : Text(
-                      icon,
-                      style: const TextStyle(fontSize: 30),
-                    ),
+              child: Text(
+                icon,
+                style: const TextStyle(fontSize: 30),
+              ),
             ),
           ),
           const SizedBox(width: 16),

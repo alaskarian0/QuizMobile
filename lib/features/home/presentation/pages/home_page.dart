@@ -462,7 +462,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           icon: Icons.track_changes,
           gradient: const [Color(0xFF10B981), Color(0xFF144E2C)],
           bgImageUrl: quiz.imageUrl ?? 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=1080',
-          onTap: () => context.push('/quiz/${quiz.id}'),
+          onTap: () => context.push('/quiz', extra: {'quizId': quiz.id}),
         );
       },
       loading: () => _buildChallengeCardSkeleton(),
@@ -515,6 +515,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                   opacity: 0.7,
                   child: AppNetworkImage(
                     url: bgImageUrl,
+                    width: double.infinity,
+                    height: double.infinity,
                     fit: BoxFit.cover,
                   ),
                 ),
