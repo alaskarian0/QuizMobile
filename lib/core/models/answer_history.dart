@@ -29,9 +29,9 @@ class AnswerHistory {
       id: json['id'] as String,
       userId: json['userId'] as String,
       questionId: json['questionId'] as String,
-      answer: json['answer'] as int,
-      isCorrect: json['isCorrect'] as bool,
-      xpEarned: json['xpEarned'] as int? ?? 0,
+      answer: (json['answer'] as num?)?.toInt() ?? 0,
+      isCorrect: json['isCorrect'] as bool? ?? false,
+      xpEarned: (json['xpEarned'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       question: json['question'] != null
@@ -73,11 +73,11 @@ class AnswerStats {
 
   factory AnswerStats.fromJson(Map<String, dynamic> json) {
     return AnswerStats(
-      total: json['total'] as int,
-      correct: json['correct'] as int,
-      incorrect: json['incorrect'] as int,
-      accuracy: (json['accuracy'] as num).toDouble(),
-      totalXP: json['totalXP'] as int? ?? 0,
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      correct: (json['correct'] as num?)?.toInt() ?? 0,
+      incorrect: (json['incorrect'] as num?)?.toInt() ?? 0,
+      accuracy: (json['accuracy'] as num?)?.toDouble() ?? 0.0,
+      totalXP: (json['totalXP'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -107,8 +107,8 @@ class QuestionHistoryStats {
   factory QuestionHistoryStats.fromJson(Map<String, dynamic> json) {
     return QuestionHistoryStats(
       questionId: json['questionId'] as String,
-      attempts: json['attempts'] as int,
-      correctRate: (json['correctRate'] as num).toDouble(),
+      attempts: (json['attempts'] as num?)?.toInt() ?? 0,
+      correctRate: (json['correctRate'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

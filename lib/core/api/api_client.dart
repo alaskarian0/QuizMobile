@@ -26,7 +26,7 @@ class ApiClient {
   static String _getDefaultBaseUrl() {
     // Check if running on web
     if (kIsWeb) {
-      return 'http://localhost:3001/api';
+      return 'http://localhost:3000/api';
     }
 
     // For development, use emulator-accessible URLs
@@ -34,13 +34,13 @@ class ApiClient {
     // iOS simulator can use localhost
     if (Platform.isAndroid) {
       // If using physical device, change this to your machine's local IP (e.g. 192.168.0.183)
-      return 'http://10.0.2.2:3001/api';
+      return 'http://10.0.2.2:3000/api';
     } else if (Platform.isIOS) {
-      return 'http://localhost:3001/api';
+      return 'http://localhost:3000/api';
     }
 
     // For other platforms, use localhost
-    return 'http://localhost:3001/api';
+    return 'http://localhost:3000/api';
   }
 
   /// Normalizes a URL for proper image loading.

@@ -94,16 +94,12 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final session = await _quizService.startQuiz(quizId, categoryId: categoryId);
-      if (session != null) {
-        state = QuizSessionState(
-          session: session,
-          userAnswers: List<int?>.filled(session.questions.length, null),
-          currentQuestionIndex: 0,
-          isLoading: false,
-        );
-      } else {
-        state = state.copyWith(isLoading: false, error: 'Failed to start quiz');
-      }
+      state = QuizSessionState(
+        session: session,
+        userAnswers: List<int?>.filled(session.questions.length, null),
+        currentQuestionIndex: 0,
+        isLoading: false,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -150,24 +146,26 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
 
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final answers = state.userAnswers.cast<int>();
+      final answers = <Map<String, dynamic>>[];
+      for (int i = 0; i < state.session!.questions.length; i++) {
+        answers.add({
+          'questionId': state.session!.questions[i].id,
+          'selectedOption': state.userAnswers[i] ?? 0,
+        });
+      }
+
       final result = await _quizService.submitQuiz(
         state.session!.quizId,
         answers: answers,
         timeSpent: timeSpent,
       );
 
-      if (result != null) {
-        state = state.copyWith(
-          result: result,
-          isCompleted: true,
-          isLoading: false,
-        );
-        return true;
-      } else {
-        state = state.copyWith(isLoading: false, error: 'Failed to submit quiz');
-        return false;
-      }
+      state = state.copyWith(
+        result: result,
+        isCompleted: true,
+        isLoading: false,
+      );
+      return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

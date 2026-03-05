@@ -118,6 +118,8 @@ class AppRouter {
                       return ResultsPage(
                         score: extra?['score'] ?? 0,
                         total: extra?['total'] ?? 0,
+                        xp: extra?['xp'] ?? 0,
+                        quizId: extra?['quizId'],
                       );
                     },
                   ),

@@ -21,8 +21,8 @@ class Level {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? 'مستوى جديد',
       description: json['description'] as String?,
-      order: json['order'] as int? ?? 0,
-      xpReward: json['xpReward'] as int? ?? 100,
+      order: (json['order'] as num?)?.toInt() ?? 0,
+      xpReward: (json['xpReward'] as num?)?.toInt() ?? 100,
       difficulty: json['difficulty'] as String? ?? 'MEDIUM',
     );
   }

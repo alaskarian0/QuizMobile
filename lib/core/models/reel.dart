@@ -37,12 +37,12 @@ class Reel {
       title: json['title'] as String,
       mediaUrl: json['mediaUrl'] as String?,
       mediaType: json['mediaType'] as String? ?? 'IMAGE',
-      xpReward: json['xpReward'] as int? ?? 0,
+      xpReward: (json['xpReward'] as num?)?.toInt() ?? 0,
       isActive: json['isActive'] as bool? ?? true,
       expiresAt: json['expiresAt'] != null
           ? DateTime.parse(json['expiresAt'] as String)
           : null,
-      views: json['views'] as int? ?? 0,
+      views: (json['views'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       user: json['user'] != null

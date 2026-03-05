@@ -68,114 +68,76 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
   }
 
   Widget _buildMainPath(List<Category> categories) {
-    // Only show categories marked for the home/path
-    final pathCategories = categories.where((c) => c.showOnHome).toList();
+    // Collect all levels from all categories and all stages into one list
+    final allLevels = <Level>[];
+    for (var cat in categories.where((c) => c.showOnHome)) {
+      for (var stage in cat.stages) {
+        allLevels.addAll(stage.levels);
+      }
+    }
 
-    if (pathCategories.isEmpty) {
+    if (allLevels.isEmpty) {
       return Center(
         child: Text(
-          'لا توجد مسارات تعليمية حالياً',
+          'لا توجد مستويات حالياً',
           style: GoogleFonts.cairo(fontSize: 16),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      itemCount: pathCategories.length,
-      itemBuilder: (context, index) {
-        final category = pathCategories[index];
-        return Column(
-          children: [
-            _buildUnitHeader(
-              context,
-              title: category.name,
-              description: category.description ?? '',
-              icon: category.icon ?? '⭐',
-              color: _getCategoryColor(category.color),
-            ),
-            _buildCategoryStages(context, category),
-            const SizedBox(height: 40),
-          ],
-        );
-      },
-    );
-  }
+    // We reverse the list for the "bottom-up" view
+    // Level 1 will be at index 0 (bottom of the scroll)
+    final reversedLevels = allLevels.toList();
 
-  Color _getCategoryColor(String? colorStr) {
-    if (colorStr == null) return AppColors.emeraldGreen;
-    try {
-      return Color(int.parse(colorStr.replaceAll('#', '0xFF')));
-    } catch (e) {
-      return AppColors.emeraldGreen;
-    }
-  }
-
-  Widget _buildCategoryStages(BuildContext context, Category category) {
-    // In a real app, we would fetch stages for each category
-    // For now, if stages are not pre-loaded, we can show a placeholder or basic levels
-    final stages = category.stages ?? [];
-    
-    if (stages.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
-          'سيتم إضافة المستويات قريباً',
-          style: GoogleFonts.cairo(color: Colors.grey),
-        ),
-      );
-    }
-
-    return Column(
-      children: stages.map((stage) {
-        final levels = stage.levels ?? [];
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(
-                stage.name,
-                style: GoogleFonts.cairo(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-            _buildPathNodes(context, levels),
-          ],
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildPathNodes(BuildContext context, List<Level> levels) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+    return SingleChildScrollView(
+      controller: ScrollController(initialScrollOffset: 0),
+      reverse: true,
+      padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 60), // Increased horizontal padding
       child: Column(
-        children: List.generate(levels.length, (index) {
-          final level = levels[index];
-          final isEven = index % 2 == 0;
-          final xOffset = isEven ? -40.0 : 40.0;
+        children: List.generate(reversedLevels.length, (index) {
+          final levelIndex = reversedLevels.length - 1 - index;
+          final level = reversedLevels[levelIndex];
+          final globalLevelNumber = levelIndex + 1;
           
-          // Using placeholder states for demonstration
-          final state = index == 0 ? 'active' : 'locked';
+          // Zig-zag pattern
+          final isLeft = globalLevelNumber % 2 != 0;
+          
+          // Logic for unlocking (dummy for now)
+          final isUnlocked = levelIndex <= 1;
+          final isActive = levelIndex == 1;
+          final isCompleted = levelIndex < 1;
+          final state = isCompleted ? 'completed' : (isActive ? 'active' : (isUnlocked ? 'active' : 'locked'));
 
-          return Column(
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
             children: [
-              Transform.translate(
-                offset: Offset(xOffset, 0),
-                child: _buildNodeItem(
-                  context: context,
-                  id: level.id,
-                  title: level.name,
-                  state: state,
-                  type: 'quiz', // Levels in the path are usually quizzes
-                  xp: level.xpReward,
+              if (index > 0)
+                Positioned(
+                  bottom: 120, // Adjusted vertical spacing
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width - 120, // Respect new padding
+                    height: 120,
+                    child: CustomPaint(
+                      painter: PathPainter(
+                        isFromLeft: (globalLevelNumber - 1) % 2 != 0,
+                        isLocked: !isUnlocked,
+                      ),
+                    ),
+                  ),
                 ),
+                
+              _buildNodeItem(
+                context: context,
+                id: level.id,
+                title: 'المستوى $globalLevelNumber',
+                state: state,
+                type: 'quiz',
+                xp: level.xpReward,
+                alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
               ),
-              if (index < levels.length - 1)
-                _buildConnector(isEven: isEven, isLocked: index + 1 > 0),
+              
+              const SizedBox(height: 150), // Standardized spacing
             ],
           );
         }),
@@ -187,14 +149,34 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildStatItem('XP ${stats?.totalXP ?? 0}', Icons.star, Colors.amber),
-          const SizedBox(width: 16),
           _buildStatItem('${stats?.streak ?? 0}', Icons.local_fire_department, Colors.orange),
+          Text(
+            'المسار التعليمي',
+            style: GoogleFonts.cairo(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          _buildStatItem('${stats?.totalXP ?? 0}', Icons.stars, Colors.amber),
         ],
       ),
     );
@@ -291,6 +273,7 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
     required String state,
     required String type,
     required int xp,
+    required Alignment alignment,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -314,87 +297,85 @@ class _LearningPathPageState extends ConsumerState<LearningPathPage> {
         icon = Icons.book;
     }
 
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            if (!isLocked) {
-              if (type == 'quiz') {
-                context.push('/quiz', extra: {'quizId': id});
-              } else {
-                context.push('/lesson', extra: {'lessonId': id});
+    return Align(
+      alignment: alignment,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () {
+              if (!isLocked) {
+                if (type == 'quiz') {
+                  context.push('/quiz', extra: {'quizId': id});
+                } else {
+                  context.push('/lesson', extra: {'lessonId': id});
+                }
               }
-            }
-          },
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              if (isActive)
-                const _PulseRing(),
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: nodeColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    if (!isLocked)
-                      BoxShadow(
-                        color: nodeColor.withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                  ],
-                  border: isActive
-                      ? Border.all(color: AppColors.goldenYellow, width: 4)
-                      : null,
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (isActive)
+                  const _PulseRing(),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: nodeColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      if (!isLocked)
+                        BoxShadow(
+                          color: nodeColor.withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                    ],
+                    border: isActive
+                        ? Border.all(color: AppColors.goldenYellow, width: 4)
+                        : null,
+                  ),
+                  child: Icon(
+                    isLocked ? Icons.lock : (isCompleted ? Icons.check : icon),
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
-                child: Icon(
-                  isLocked ? Icons.lock : (isCompleted ? Icons.check : icon),
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: GoogleFonts.cairo(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isLocked ? colorScheme.onSurface.withOpacity(0.3) : colorScheme.onSurface,
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: GoogleFonts.cairo(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: isLocked ? colorScheme.onSurface.withOpacity(0.3) : colorScheme.onSurface,
+            ),
           ),
-        ),
-        Text(
-          'XP $xp',
-          style: GoogleFonts.cairo(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: isLocked ? colorScheme.onSurface.withOpacity(0.2) : colorScheme.onSurfaceVariant,
+          Text(
+            'XP $xp',
+            style: GoogleFonts.cairo(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: isLocked ? colorScheme.onSurface.withOpacity(0.2) : colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildConnector({required bool isEven, required bool isLocked}) {
-    return SizedBox(
-      height: 60,
-      width: 100,
-      child: CustomPaint(
-        painter: PathPainter(isEven: isEven, isLocked: isLocked),
-      ),
-    );
+    return const SizedBox.shrink(); // Not used anymore as we use Stack positioning
   }
 }
 
 class PathPainter extends CustomPainter {
-  final bool isEven;
+  final bool isFromLeft;
   final bool isLocked;
 
-  PathPainter({required this.isEven, required this.isLocked});
+  PathPainter({required this.isFromLeft, required this.isLocked});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -405,21 +386,24 @@ class PathPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final path = Path();
-    if (isEven) {
-      path.moveTo(size.width * 0.2, 0);
-      path.quadraticBezierTo(
-        size.width * 0.2,
-        size.height * 0.5,
-        size.width * 0.8,
-        size.height,
+    
+    // Width is constrained to node center-to-center
+    // Start at bottom center of the current alignment, end at top center of target
+    if (isFromLeft) {
+      // From Left node (bottom) to Right node (top)
+      path.moveTo(0, size.height);
+      path.cubicTo(
+        0, size.height * 0.5,
+        size.width, size.height * 0.5,
+        size.width, 0,
       );
     } else {
-      path.moveTo(size.width * 0.8, 0);
-      path.quadraticBezierTo(
-        size.width * 0.8,
-        size.height * 0.5,
-        size.width * 0.2,
-        size.height,
+      // From Right node (bottom) to Left node (top)
+      path.moveTo(size.width, size.height);
+      path.cubicTo(
+        size.width, size.height * 0.5,
+        0, size.height * 0.5,
+        0, 0,
       );
     }
 

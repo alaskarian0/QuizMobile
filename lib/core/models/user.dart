@@ -182,18 +182,18 @@ class UserStats {
 
   factory UserStats.fromJson(Map<String, dynamic> json) {
     return UserStats(
-      totalQuestions: json['totalQuestions'] as int? ?? 0,
-      correctAnswers: json['correctAnswers'] as int? ?? 0,
+      totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? 0,
+      correctAnswers: (json['correctAnswers'] as num?)?.toInt() ?? 0,
       accuracy: (json['accuracy'] as num?)?.toDouble() ?? 0.0,
-      totalXP: json['totalXP'] as int? ?? 0,
-      level: json['level'] as int? ?? 1,
-      streak: json['streak'] as int? ?? 0,
-      quizzesCompleted: json['quizzesCompleted'] as int? ?? 0,
+      totalXP: (json['totalXP'] as num?)?.toInt() ?? 0,
+      level: (json['level'] as num?)?.toInt() ?? 1,
+      streak: (json['streak'] as num?)?.toInt() ?? 0,
+      quizzesCompleted: (json['quizzesCompleted'] as num?)?.toInt() ?? 0,
       badges: (json['badges'] as List?)
               ?.map((e) => Badge.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      rank: json['rank'] as int? ?? 0,
+      rank: (json['rank'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -222,12 +222,12 @@ class Badge {
 
   factory Badge.fromJson(Map<String, dynamic> json) {
     return Badge(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
       nameAr: json['nameAr'] as String?,
       description: json['description'] as String?,
       icon: json['icon'] as String?,
-      xpReward: json['xpReward'] as int?,
+      xpReward: (json['xpReward'] as num?)?.toInt(),
       category: json['category'] as String?,
       earnedAt: json['earnedAt'] != null
           ? DateTime.parse(json['earnedAt'] as String)
@@ -271,16 +271,16 @@ class Achievement {
 
   factory Achievement.fromJson(Map<String, dynamic> json) {
     return Achievement(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
       titleAr: json['titleAr'] as String?,
       description: json['description'] as String?,
       icon: json['icon'] as String?,
       type: json['type'] as String? ?? 'DAILY',
-      xpReward: json['xpReward'] as int?,
-      targetValue: json['targetValue'] as int?,
+      xpReward: (json['xpReward'] as num?)?.toInt(),
+      targetValue: (json['targetValue'] as num?)?.toInt(),
       category: json['category'] as String?,
-      progress: json['progress'] as int?,
+      progress: (json['progress'] as num?)?.toInt(),
       isCompleted: json['isCompleted'] as bool?,
       completedAt: json['completedAt'] != null
           ? DateTime.parse(json['completedAt'] as String)
@@ -326,13 +326,13 @@ class LeaderboardEntry {
 
   factory LeaderboardEntry.fromJson(Map<String, dynamic> json) {
     return LeaderboardEntry(
-      rank: json['rank'] as int,
-      id: json['id'] as String,
-      username: json['username'] as String,
-      name: json['name'] as String,
+      rank: (json['rank'] as num?)?.toInt() ?? 0,
+      id: json['id'] as String? ?? '',
+      username: json['username'] as String? ?? '',
+      name: json['name'] as String? ?? '',
       avatar: json['avatar'] as String?,
-      xp: json['xp'] as int? ?? 0,
-      level: json['level'] as int? ?? 1,
+      xp: (json['xp'] as num?)?.toInt() ?? 0,
+      level: (json['level'] as num?)?.toInt() ?? 1,
       accuracy: (json['accuracy'] as num?)?.toDouble() ?? 0.0,
     );
   }

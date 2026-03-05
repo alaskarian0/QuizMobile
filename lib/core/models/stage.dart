@@ -24,7 +24,7 @@ class Stage {
       name: json['name'] as String? ?? 'قسم جديد',
       slug: json['slug'] as String? ?? '',
       description: json['description'] as String?,
-      order: json['order'] as int? ?? 0,
+      order: (json['order'] as num?)?.toInt() ?? 0,
       levels: (json['levels'] as List?)
               ?.map((e) => Level.fromJson(e as Map<String, dynamic>))
               .toList() ??

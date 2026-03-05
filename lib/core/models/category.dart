@@ -39,10 +39,10 @@ class Category {
       color: json['color'] as String?,
       description: json['description'] as String?,
       imageUrl: json['imageUrl'] as String?,
-      questionCount: json['questionCount'] as int? ??
+      questionCount: (json['questionCount'] as num?)?.toInt() ??
                     (json['questions'] as List?)?.length ?? 0,
       showOnHome: json['showOnHome'] as bool? ?? false,
-      showOnHomeOrder: json['showOnHomeOrder'] as int? ?? 0,
+      showOnHomeOrder: (json['showOnHomeOrder'] as num?)?.toInt() ?? 0,
       showAsChallenge: json['showAsChallenge'] as bool? ?? false,
       stages: (json['stages'] as List?)
               ?.map((e) => Stage.fromJson(e as Map<String, dynamic>))

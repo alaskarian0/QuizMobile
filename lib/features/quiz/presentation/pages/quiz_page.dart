@@ -52,8 +52,10 @@ class _QuizPageState extends ConsumerState<QuizPage> {
         if (success) {
           final result = ref.read(quizSessionProvider(quizId)).result;
           context.pushReplacement('/results', extra: {
-            'score': result?.score ?? 0,
+            'score': result?.correctAnswers ?? 0,
             'total': result?.total ?? sessionState.totalQuestions,
+            'xp': result?.xpEarned ?? 0,
+            'quizId': quizId,
           });
         }
       });

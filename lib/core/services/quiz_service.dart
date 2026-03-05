@@ -31,7 +31,7 @@ class QuizService {
   }
 
   /// Start a quiz session
-  Future<QuizSession?> startQuiz(String quizId, {String? categoryId}) async {
+  Future<QuizSession> startQuiz(String quizId, {String? categoryId}) async {
     try {
       final response = await _apiClient.post(
         '/quizzes/$quizId/start',
@@ -42,14 +42,14 @@ class QuizService {
       final data = _apiClient.handleResponse(response);
       return QuizSession.fromJson(data as Map<String, dynamic>);
     } catch (e) {
-      return null;
+      throw _handleError(e);
     }
   }
 
   /// Submit quiz answers
-  Future<QuizResult?> submitQuiz(
+  Future<QuizResult> submitQuiz(
     String quizId, {
-    required List<int> answers,
+    required List<Map<String, dynamic>> answers,
     required int timeSpent,
   }) async {
     try {
@@ -63,7 +63,7 @@ class QuizService {
       final data = _apiClient.handleResponse(response);
       return QuizResult.fromJson(data as Map<String, dynamic>);
     } catch (e) {
-      return null;
+      throw _handleError(e);
     }
   }
 

@@ -33,8 +33,8 @@ class Article {
       imageUrl: json['imageUrl'] as String?,
       author: json['author'] as String?,
       category: json['category'] as String? ?? 'islamic-knowledge',
-      likes: json['likes'] as int? ?? 0,
-      views: json['views'] as int? ?? 0,
+      likes: (json['likes'] as num?)?.toInt() ?? 0,
+      views: (json['views'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String? ?? DateTime.now().toIso8601String()),
     );
   }
@@ -76,10 +76,10 @@ class Lesson {
       description: json['description'] as String?,
       videoUrl: json['videoUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
-      duration: json['duration'] as int? ?? 0,
+      duration: (json['duration'] as num?)?.toInt() ?? 0,
       category: json['category'] as String? ?? 'quran',
       level: json['level'] as String? ?? 'BEGINNER',
-      xpReward: json['xpReward'] as int? ?? 0,
+      xpReward: (json['xpReward'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String? ?? DateTime.now().toIso8601String()),
     );
   }
@@ -133,10 +133,10 @@ class Podcast {
       description: json['description'] as String?,
       audioUrl: json['audioUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
-      duration: json['duration'] as int? ?? 0,
+      duration: (json['duration'] as num?)?.toInt() ?? 0,
       category: json['category'] as String? ?? 'education',
       speaker: json['speaker'] as String?,
-      xpReward: json['xpReward'] as int? ?? 0,
+      xpReward: (json['xpReward'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String? ?? DateTime.now().toIso8601String()),
     );
   }
@@ -191,9 +191,9 @@ class EBook {
       fileUrl: json['fileUrl'] as String,
       coverUrl: json['coverUrl'] as String?,
       author: json['author'] as String?,
-      pages: json['pages'] as int?,
+      pages: (json['pages'] as num?)?.toInt(),
       category: json['category'] as String? ?? 'islamic',
-      xpReward: json['xpReward'] as int? ?? 0,
+      xpReward: (json['xpReward'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String? ?? DateTime.now().toIso8601String()),
     );
   }

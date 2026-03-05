@@ -58,8 +58,8 @@ class Quiz {
       category: json['category'] != null
           ? CategorySimple.fromJson(json['category'] as Map<String, dynamic>)
           : null,
-      timeLimit: json['timeLimit'] as int? ?? 300,
-      xp: json['xp'] as int? ?? 100,
+      timeLimit: (json['timeLimit'] as num?)?.toInt() ?? 300,
+      xp: (json['xp'] as num?)?.toInt() ?? 100,
       difficulty: QuizDifficulty.fromString(json['difficulty'] as String? ?? 'MEDIUM'),
       questions: (json['questions'] as List?)
               ?.map((e) => QuizQuestion.fromJson(e as Map<String, dynamic>))
@@ -111,7 +111,7 @@ class QuizQuestion {
       question: json['question'] != null
           ? QuizQuestionSimple.fromJson(json['question'] as Map<String, dynamic>)
           : null,
-      order: json['order'] as int? ?? 0,
+      order: (json['order'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -197,14 +197,23 @@ class QuizResult {
   });
 
   factory QuizResult.fromJson(Map<String, dynamic> json) {
+    final score = (json['score'] as num?)?.toInt() ?? 0;
+    final total = (json['totalQuestions'] as num?)?.toInt() ?? 
+                 (json['total'] as num?)?.toInt() ?? 0;
+    
     return QuizResult(
-      score: json['score'] as int,
-      total: json['total'] as int,
-      correctAnswers: json['correctAnswers'] as int,
-      xpEarned: json['xpEarned'] as int,
-      accuracy: (json['accuracy'] as num).toDouble(),
-      completedAt: DateTime.parse(json['completedAt'] as String),
-      results: (json['results'] as List?)
+      score: score,
+      total: total,
+      correctAnswers: (json['correctAnswers'] as num?)?.toInt() ?? 0,
+      xpEarned: (json['xpEarned'] as num?)?.toInt() ?? 0,
+      accuracy: total > 0 ? (score / total) * 100 : 0.0,
+      completedAt: json['completedAt'] != null 
+          ? DateTime.parse(json['completedAt'] as String)
+          : DateTime.now(),
+      results: (json['answers'] as List?)
+              ?.map((e) => QuizAnswerResult.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          (json['results'] as List?)
               ?.map((e) => QuizAnswerResult.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -213,10 +222,9 @@ class QuizResult {
 
   /// Get star rating (1-3 stars)
   int get stars {
-    final percentage = accuracy / 100;
-    if (percentage >= 0.9) return 3;
-    if (percentage >= 0.7) return 2;
-    if (percentage >= 0.5) return 1;
+    if (accuracy >= 90) return 3;
+    if (accuracy >= 70) return 2;
+    if (accuracy >= 50) return 1;
     return 0;
   }
 }
@@ -227,20 +235,25 @@ class QuizAnswerResult {
   final bool correct;
   final int correctAnswer;
   final int userAnswer;
+  final String? explanation;
 
   QuizAnswerResult({
     required this.questionId,
     required this.correct,
     required this.correctAnswer,
     required this.userAnswer,
+    this.explanation,
   });
 
   factory QuizAnswerResult.fromJson(Map<String, dynamic> json) {
     return QuizAnswerResult(
-      questionId: json['questionId'] as String,
-      correct: json['correct'] as bool,
-      correctAnswer: json['correctAnswer'] as int,
-      userAnswer: json['userAnswer'] as int,
+      questionId: json['questionId'] as String? ?? '',
+      correct: json['isCorrect'] as bool? ?? json['correct'] as bool? ?? false,
+      correctAnswer: (json['correctOption'] as num?)?.toInt() ?? 
+                    (json['correctAnswer'] as num?)?.toInt() ?? 0,
+      userAnswer: (json['selectedOption'] as num?)?.toInt() ?? 
+                  (json['userAnswer'] as num?)?.toInt() ?? 0,
+      explanation: json['explanation'] as String?,
     );
   }
 }
@@ -265,11 +278,11 @@ class QuizHistoryItem {
 
   factory QuizHistoryItem.fromJson(Map<String, dynamic> json) {
     return QuizHistoryItem(
-      id: json['id'] as String,
-      score: json['score'] as int,
-      total: json['total'] as int,
-      xpEarned: json['xpEarned'] as int,
-      completedAt: DateTime.parse(json['completedAt'] as String),
+      id: json['id'] as String? ?? '',
+      score: (json['score'] as num?)?.toInt() ?? 0,
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      xpEarned: (json['xpEarned'] as num?)?.toInt() ?? 0,
+      completedAt: DateTime.parse(json['completedAt'] as String? ?? DateTime.now().toIso8601String()),
       quiz: QuizSimpleInfo.fromJson(json['quiz'] as Map<String, dynamic>? ?? {}),
     );
   }

@@ -73,14 +73,14 @@ class Question {
         json['difficulty'] as String? ?? 'MEDIUM',
       ),
       options: parseOptions(json['options']),
-      correctOption: json['correctOption'] as int? ??
-                    json['correctAnswer'] as int? ?? 0,
+      correctOption: (json['correctOption'] as num?)?.toInt() ??
+                    (json['correctAnswer'] as num?)?.toInt() ?? 0,
       explanation: json['explanation'] as String?,
-      categoryId: json['categoryId'] as String,
+      categoryId: json['categoryId'] as String? ?? '',
       stageId: json['stageId'] as String?,
       levelId: json['levelId'] as String?,
-      xpReward: json['xpReward'] as int?,
-      timeLimit: json['timeLimit'] as int?,
+      xpReward: (json['xpReward'] as num?)?.toInt(),
+      timeLimit: (json['timeLimit'] as num?)?.toInt(),
       createdAt: DateTime.parse(
         json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
@@ -144,9 +144,9 @@ class DailyQuestion {
         json['difficulty'] as String? ?? 'MEDIUM',
       ),
       options: parseOptions(json['options']),
-      correctOption: json['correctOption'] as int? ??
-                    json['correctAnswer'] as int? ?? 0,
-      xpReward: json['xpReward'] as int? ?? 10,
+      correctOption: (json['correctOption'] as num?)?.toInt() ??
+                    (json['correctAnswer'] as num?)?.toInt() ?? 0,
+      xpReward: (json['xpReward'] as num?)?.toInt() ?? 10,
     );
   }
 }
@@ -169,11 +169,11 @@ class QuestionStats {
 
   factory QuestionStats.fromJson(Map<String, dynamic> json) {
     return QuestionStats(
-      totalQuestions: json['totalQuestions'] as int? ?? 0,
-      easyQuestions: json['easyQuestions'] as int? ?? 0,
-      mediumQuestions: json['mediumQuestions'] as int? ?? 0,
-      hardQuestions: json['hardQuestions'] as int? ?? 0,
-      categoriesCount: json['categoriesCount'] as int? ?? 0,
+      totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? 0,
+      easyQuestions: (json['easyQuestions'] as num?)?.toInt() ?? 0,
+      mediumQuestions: (json['mediumQuestions'] as num?)?.toInt() ?? 0,
+      hardQuestions: (json['hardQuestions'] as num?)?.toInt() ?? 0,
+      categoriesCount: (json['categoriesCount'] as num?)?.toInt() ?? 0,
     );
   }
 }

@@ -6,11 +6,15 @@ import '../../../../core/widgets/app_network_image.dart';
 class ResultsPage extends StatelessWidget {
   final int score;
   final int total;
+  final int xp;
+  final String? quizId;
 
   const ResultsPage({
     super.key,
     required this.score,
     required this.total,
+    required this.xp,
+    this.quizId,
   });
 
   @override
@@ -62,7 +66,7 @@ class ResultsPage extends StatelessWidget {
                 width: double.infinity,
                 height: 58,
                 child: OutlinedButton(
-                  onPressed: () => context.pushReplacement('/quiz'),
+                  onPressed: () => context.pushReplacement('/quiz', extra: {'quizId': quizId}),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFF1B4332), width: 2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -138,7 +142,7 @@ class ResultsPage extends StatelessWidget {
       children: [
         _ResultStat(label: 'إجابة صحيحة', value: '$score', color: const Color(0xFF10B981)),
         _ResultStat(label: 'إجابة خاطئة', value: '${total - score}', color: AppColors.errorRed),
-        const _ResultStat(label: 'نقاط XP', value: '+150', color: Color(0xFF3B82F6)),
+        _ResultStat(label: 'نقاط XP', value: '+$xp', color: const Color(0xFF3B82F6)),
       ],
     );
   }
